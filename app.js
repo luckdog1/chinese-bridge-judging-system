@@ -2,11 +2,323 @@ import { createClient } from "@supabase/supabase-js";
 
 const STORAGE_KEY = "chinese-bridge-review-demo-v1";
 const SESSION_KEY = "chinese-bridge-review-session-v1";
+const LANGUAGE_KEY = "chinese-bridge-review-language-v1";
 const SUPABASE_STATE_ID = "main";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase =
   SUPABASE_URL && SUPABASE_ANON_KEY ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+const I18N = {
+  zh: {
+    appTitle: "汉语桥评审系统",
+    eventTitle: "小学组 · 阿德莱德赛区 · 总决赛",
+    bridgeMark: "桥",
+    languageButton: "English",
+    supabaseDb: "Supabase 数据库",
+    localDemoData: "本地演示数据",
+    resetData: "重置数据",
+    logout: "退出",
+    superAdmin: "一级管理员",
+    regionalAdmin: "二级管理员",
+    judge: "评委",
+    notStarted: "未评分",
+    draft: "已保存",
+    submitted: "已提交",
+    returned: "被退回",
+    inProgress: "进行中",
+    saved: "已保存",
+    notLoggedIn: "未登录",
+    loggedIn: "已登录",
+    changed: "已修改",
+    notChanged: "未修改",
+    yes: "是",
+    no: "否",
+    bootTitle: "汉语桥（小学组）现场评审",
+    bootText: "正在加载比赛数据，请稍候。",
+    loadingData: "加载数据",
+    connectingSupabase: "正在连接 Supabase 数据库。",
+    usingLocalData: "未配置 Supabase，正在使用本地演示数据。",
+    loginTitle: "登录",
+    loginIntro: "面向评委现场评分、管理员实时查看进度与最终排名的简洁原型。配置 Supabase 后，数据会从数据库动态加载。",
+    supabaseConnected: "当前已连接 Supabase 数据库。",
+    localConnected: "当前未配置 Supabase，正在使用本地演示数据。",
+    username: "账号",
+    password: "密码",
+    login: "登录",
+    demoAccounts: "演示账号",
+    adminDemo: "管理员：admin / admin123",
+    judgeDemo: "评委：judge1 到 judge6 / 123456",
+    forceChangeTitle: "首次登录需要修改密码",
+    forceChangeText: "这是评委进入评分页前的强制步骤，用来模拟现场账号首次分发后的安全要求。",
+    enterNewPassword: "请输入新密码后继续评分。",
+    newPassword: "新密码",
+    saveAndEnter: "保存并进入",
+    backLogin: "返回登录",
+    dashboard: "比赛概览",
+    contestants: "参赛小朋友",
+    judges: "评委账户",
+    rawScores: "原始评分",
+    results: "最终排名",
+    overviewHeroTitle: "现场评分稳定、清晰、可追踪",
+    overviewHeroText: "评委保存草稿并最终提交；管理员实时查看进度、退回修改、计算去最高最低后的最终排名。",
+    contestantCount: "参赛小朋友",
+    judgeCount: "评委人数",
+    readyResults: "已出正式排名",
+    overviewTitle: "比赛概览",
+    overviewText: "当前显示比赛数据，刷新后保存状态会保留。",
+    judgeSubmissions: "评委提交",
+    scoreItems: "评分项目",
+    region: "赛区",
+    progressTitle: "评分进度",
+    loginStatus: "登录",
+    changedInitialPassword: "首次改密",
+    scored: "已评分",
+    status: "状态",
+    contestantManagement: "参赛小朋友管理",
+    contestantText: "第一版先用内置名单模拟 Excel 导入后的数据结构。",
+    addSampleContestant: "新增示例选手",
+    number: "编号",
+    name: "姓名",
+    age: "年龄",
+    group: "组别",
+    performance: "表演项目",
+    order: "出场顺序",
+    notes: "备注",
+    judgeManagement: "评委账户管理",
+    judgeManagementText: "支持自定义评委姓名、登录账号、赛区和初始密码，也可以重置密码、退回已提交评分。",
+    judgeName: "评委姓名",
+    loginAccount: "登录账号",
+    initialPassword: "初始密码",
+    createJudge: "创建评委账号",
+    passwordChanged: "已改密",
+    progress: "进度",
+    actions: "操作",
+    resetPassword: "重置密码",
+    returnForEdit: "退回修改",
+    rawScoresText: "按小朋友展示每位评委的总分和状态。",
+    finalResultsTitle: "最终成绩与排名",
+    finalResultsText: "所有评委提交后自动去掉一个最高分和一个最低分，保留两位小数。",
+    exportCsv: "导出 CSV",
+    rank: "排名",
+    sequence: "顺序",
+    highDropped: "去掉最高",
+    lowDropped: "去掉最低",
+    finalAverage: "最终平均",
+    waitingAllSubmitted: "待全部提交",
+    judgeDashboard: "评分总览",
+    judgeContestants: "参赛列表",
+    judgeSubmit: "最终提交",
+    welcomeScore: "欢迎评分",
+    judgeHeroText: "请按出场顺序完成所有小朋友评分。保存草稿后可以继续修改，最终提交后会锁定，除非管理员退回。",
+    currentStatus: "当前状态",
+    fullScore: "满分",
+    contestantListText: "按出场顺序排列，所有小朋友都有总分后才能最终提交。",
+    totalScore: "总分",
+    score: "评分",
+    goSubmit: "去最终提交",
+    submitTitle: "最终提交",
+    submitText: "提交前系统会检查每位小朋友都有 0 到 100 之间的总分。",
+    scoreCount: "评分数量",
+    missingScores: "待补评分",
+    submitAll: "提交全部评分",
+    backContestants: "返回参赛列表",
+    back: "返回",
+    scoreDetails: "评分细则",
+    detailsHint: "细则可选填；填写后会自动汇总到总分，评委仍可手动调整总分。",
+    maxScore: "满分",
+    totalScoreRequired: "总分（必填，0-100）",
+    commentOptional: "评语（选填）",
+    save: "Save 保存",
+    language: "语言表达",
+    content: "内容理解",
+    stage: "舞台表现",
+    creativity: "整体印象",
+    invalidLogin: "账号或密码不正确",
+    passwordMin: "新密码至少 6 位",
+    passwordChangedToast: "密码已修改",
+    fillJudgeFields: "请填写评委姓名、登录账号和赛区",
+    initialPasswordMin: "初始密码至少 6 位",
+    usernameExists: "这个登录账号已经存在",
+    createdJudge: "已创建",
+    totalScoreInvalid: "总分必须在 0 到 100 之间",
+    scoreSaved: "评分已保存",
+    unsavedLeave: "当前评分尚未保存，确定离开吗？",
+    unsavedLogout: "当前评分尚未保存，确定退出吗？",
+    confirmReset: "确定重置所有演示数据吗？",
+    missingAllScores: "还有小朋友未完成评分",
+    confirmSubmit: "提交后评分将锁定，确定提交全部评分吗？",
+    allSubmitted: "已提交全部评分",
+    returnReasonPrompt: "请输入退回原因（可留空）：",
+    returnReasonDefault: "需要重新核对评分",
+    returnedToast: "已退回评委评分",
+    passwordResetTo: "密码已重置为",
+    sampleContestant: "示例选手",
+    chineseShow: "中文展示",
+    sampleAdded: "已新增示例选手",
+    csvExported: "CSV 已导出",
+    dataLoadFailed: "数据加载失败，已使用本地演示数据",
+    saveRemoteFailed: "Supabase 保存失败，已临时切换为本地保存",
+    mustBeNumber: "必须是数字",
+    cannotLessThanZero: "不能小于 0",
+    cannotExceed: "不能超过",
+    points: "分"
+  },
+  en: {
+    appTitle: "Chinese Bridge Judging System",
+    eventTitle: "Primary Group · Adelaide Region · Final",
+    bridgeMark: "桥",
+    languageButton: "中文",
+    supabaseDb: "Supabase Database",
+    localDemoData: "Local Demo Data",
+    resetData: "Reset Data",
+    logout: "Logout",
+    superAdmin: "Super Admin",
+    regionalAdmin: "Regional Admin",
+    judge: "Judge",
+    notStarted: "Not scored",
+    draft: "Saved",
+    submitted: "Submitted",
+    returned: "Returned",
+    inProgress: "In progress",
+    saved: "Saved",
+    notLoggedIn: "Not logged in",
+    loggedIn: "Logged in",
+    changed: "Changed",
+    notChanged: "Not changed",
+    yes: "Yes",
+    no: "No",
+    bootTitle: "Chinese Bridge Primary Group Judging",
+    bootText: "Loading contest data. Please wait.",
+    loadingData: "Loading data",
+    connectingSupabase: "Connecting to Supabase.",
+    usingLocalData: "Supabase is not configured. Using local demo data.",
+    loginTitle: "Login",
+    loginIntro: "A judging prototype for on-site scoring, admin progress tracking, and final rankings. After Supabase is configured, data loads from the database.",
+    supabaseConnected: "Connected to Supabase.",
+    localConnected: "Supabase is not configured. Using local demo data.",
+    username: "Username",
+    password: "Password",
+    login: "Login",
+    demoAccounts: "Demo accounts",
+    adminDemo: "Admin: admin / admin123",
+    judgeDemo: "Judges: judge1 to judge6 / 123456",
+    forceChangeTitle: "Password change required",
+    forceChangeText: "Judges must change the initial password before entering the scoring pages.",
+    enterNewPassword: "Enter a new password to continue.",
+    newPassword: "New password",
+    saveAndEnter: "Save and enter",
+    backLogin: "Back to login",
+    dashboard: "Overview",
+    contestants: "Contestants",
+    judges: "Judge Accounts",
+    rawScores: "Raw Scores",
+    results: "Final Results",
+    overviewHeroTitle: "Stable, clear, traceable judging",
+    overviewHeroText: "Judges save drafts and submit final scores. Admins track progress, return scores for edits, and calculate final rankings.",
+    contestantCount: "Contestants",
+    judgeCount: "Judges",
+    readyResults: "Final rankings",
+    overviewTitle: "Contest Overview",
+    overviewText: "Showing contest data. Saved data is retained after refresh.",
+    judgeSubmissions: "Judge submissions",
+    scoreItems: "Score items",
+    region: "Region",
+    progressTitle: "Scoring Progress",
+    loginStatus: "Login",
+    changedInitialPassword: "Initial password",
+    scored: "Scored",
+    status: "Status",
+    contestantManagement: "Contestant Management",
+    contestantText: "This first version uses built-in sample contestants to simulate Excel import data.",
+    addSampleContestant: "Add sample contestant",
+    number: "Number",
+    name: "Name",
+    age: "Age",
+    group: "Group",
+    performance: "Performance",
+    order: "Order",
+    notes: "Notes",
+    judgeManagement: "Judge Account Management",
+    judgeManagementText: "Create custom judge names, usernames, regions, and initial passwords. Reset passwords or return submitted scores for editing.",
+    judgeName: "Judge name",
+    loginAccount: "Username",
+    initialPassword: "Initial password",
+    createJudge: "Create judge account",
+    passwordChanged: "Password changed",
+    progress: "Progress",
+    actions: "Actions",
+    resetPassword: "Reset password",
+    returnForEdit: "Return for edits",
+    rawScoresText: "View each judge's total score and status by contestant.",
+    finalResultsTitle: "Final Scores and Ranking",
+    finalResultsText: "After all judges submit, one highest and one lowest score are dropped. Final averages keep two decimals.",
+    exportCsv: "Export CSV",
+    rank: "Rank",
+    sequence: "Order",
+    highDropped: "Highest dropped",
+    lowDropped: "Lowest dropped",
+    finalAverage: "Final average",
+    waitingAllSubmitted: "Waiting for all submissions",
+    judgeDashboard: "Scoring Overview",
+    judgeContestants: "Contestant List",
+    judgeSubmit: "Final Submit",
+    welcomeScore: "welcome",
+    judgeHeroText: "Score every contestant in performance order. Saved drafts can be edited. Final submissions are locked unless returned by an admin.",
+    currentStatus: "Current status",
+    fullScore: "Full score",
+    contestantListText: "Contestants are ordered by performance order. Every contestant needs a total score before final submission.",
+    totalScore: "Total score",
+    score: "Score",
+    goSubmit: "Go to final submit",
+    submitTitle: "Final Submit",
+    submitText: "Before submission, every contestant must have a total score from 0 to 100.",
+    scoreCount: "Scored",
+    missingScores: "Missing",
+    submitAll: "Submit all scores",
+    backContestants: "Back to contestant list",
+    back: "Back",
+    scoreDetails: "Score Details",
+    detailsHint: "Details are optional. When entered, they are summed into the total score, which can still be manually adjusted.",
+    maxScore: "Max",
+    totalScoreRequired: "Total score (required, 0-100)",
+    commentOptional: "Comment (optional)",
+    save: "Save",
+    language: "Language expression",
+    content: "Content understanding",
+    stage: "Stage performance",
+    creativity: "Overall impression",
+    invalidLogin: "Invalid username or password",
+    passwordMin: "New password must be at least 6 characters",
+    passwordChangedToast: "Password changed",
+    fillJudgeFields: "Please enter judge name, username, and region",
+    initialPasswordMin: "Initial password must be at least 6 characters",
+    usernameExists: "This username already exists",
+    createdJudge: "Created",
+    totalScoreInvalid: "Total score must be between 0 and 100",
+    scoreSaved: "Score saved",
+    unsavedLeave: "Current score is not saved. Leave anyway?",
+    unsavedLogout: "Current score is not saved. Logout anyway?",
+    confirmReset: "Reset all demo data?",
+    missingAllScores: "Some contestants are missing scores",
+    confirmSubmit: "Scores will be locked after submission. Submit all scores?",
+    allSubmitted: "All scores submitted",
+    returnReasonPrompt: "Enter return reason (optional):",
+    returnReasonDefault: "Needs score review",
+    returnedToast: "Judge scores returned",
+    passwordResetTo: "Password reset to",
+    sampleContestant: "Sample contestant",
+    chineseShow: "Chinese presentation",
+    sampleAdded: "Sample contestant added",
+    csvExported: "CSV exported",
+    dataLoadFailed: "Data failed to load. Using local demo data.",
+    saveRemoteFailed: "Supabase save failed. Switched to local save temporarily.",
+    mustBeNumber: "must be a number",
+    cannotLessThanZero: "cannot be less than 0",
+    cannotExceed: "cannot exceed",
+    points: "points"
+  }
+};
 
 const seedData = {
   currentUserId: null,
@@ -141,6 +453,24 @@ let dirtyScore = false;
 let isBooting = true;
 let storageMode = supabase ? "supabase" : "local";
 let saveTimer = null;
+let currentLanguage = localStorage.getItem(LANGUAGE_KEY) || "zh";
+
+function t(key) {
+  return I18N[currentLanguage]?.[key] || I18N.zh[key] || key;
+}
+
+function scoreItemName(item) {
+  return t(item.id) || item.name;
+}
+
+function languageButton() {
+  return `
+    <button class="language-toggle" data-action="toggle-language" aria-label="Switch language">
+      <span class="${currentLanguage === "zh" ? "active" : ""}">ZH</span>
+      <span class="${currentLanguage === "en" ? "active" : ""}">EN</span>
+    </button>
+  `;
+}
 
 function loadLocalJson(key, fallback) {
   const raw = localStorage.getItem(key);
@@ -238,7 +568,7 @@ function saveState() {
     } catch (error) {
       console.error(error);
       storageMode = "local";
-      showToast("Supabase 保存失败，已临时切换为本地保存");
+      showToast(t("saveRemoteFailed"));
       render();
     }
   }, 150);
@@ -246,9 +576,9 @@ function saveState() {
 
 function roleLabel(role) {
   return {
-    super_admin: "一级管理员",
-    regional_admin: "二级管理员",
-    judge: "评委"
+    super_admin: t("superAdmin"),
+    regional_admin: t("regionalAdmin"),
+    judge: t("judge")
   }[role];
 }
 
@@ -300,11 +630,11 @@ function submissionStatus(judgeId) {
 
 function statusText(status) {
   return {
-    not_started: "未评分",
-    draft: "已保存",
-    submitted: "已提交",
-    returned: "被退回",
-    in_progress: "进行中"
+    not_started: t("notStarted"),
+    draft: t("draft"),
+    submitted: t("submitted"),
+    returned: t("returned"),
+    in_progress: t("inProgress")
   }[status];
 }
 
@@ -327,15 +657,15 @@ function validateScoreDetails(details) {
 
     const value = Number(rawValue);
     if (!Number.isFinite(value)) {
-      return `${item.name}必须是数字`;
+      return `${scoreItemName(item)} ${t("mustBeNumber")}`;
     }
 
     if (value < 0) {
-      return `${item.name}不能小于 0`;
+      return `${scoreItemName(item)} ${t("cannotLessThanZero")}`;
     }
 
     if (value > item.max) {
-      return `${item.name}不能超过 ${item.max} 分`;
+      return `${scoreItemName(item)} ${t("cannotExceed")} ${item.max} ${t("points")}`;
     }
   }
 
@@ -407,23 +737,30 @@ function escapeHtml(value) {
 function appShell(content, nav) {
   const user = currentUser();
   const role = roleLabel(user.role);
-  const storageLabel = storageMode === "supabase" ? "Supabase 数据库" : "本地演示数据";
+  const storageLabel = storageMode === "supabase" ? t("supabaseDb") : t("localDemoData");
+  const adminControls =
+    user.role === "judge"
+      ? ""
+      : `
+          <span class="badge ${storageMode === "supabase" ? "ok" : "warn"}">${storageLabel}</span>
+          <button class="btn ghost" data-action="reset-demo">${t("resetData")}</button>
+        `;
 
   return `
     <div class="shell">
       <header class="topbar">
         <div class="brand">
-          <div class="brand-mark">桥</div>
+          <div class="brand-mark">${t("bridgeMark")}</div>
           <div>
-            <h1>汉语桥评审系统</h1>
-            <p>小学组 · 阿德莱德赛区 · 总决赛</p>
+            <h1>${t("appTitle")}</h1>
+            <p>${t("eventTitle")}</p>
           </div>
         </div>
         <div class="userbar">
-          <span class="badge ${storageMode === "supabase" ? "ok" : "warn"}">${storageLabel}</span>
           <span class="badge">${escapeHtml(user.name)} · ${role}</span>
-          <button class="btn ghost" data-action="reset-demo">重置数据</button>
-          <button class="btn" data-action="logout">退出</button>
+          ${adminControls}
+          ${languageButton()}
+          <button class="btn" data-action="logout">${t("logout")}</button>
         </div>
       </header>
       <div class="layout">
@@ -454,12 +791,13 @@ function renderBooting() {
   document.querySelector("#app").innerHTML = `
     <div class="login-page">
       <section class="login-visual">
-        <h1>汉语桥（小学组）现场评审</h1>
-        <p>正在加载比赛数据，请稍候。</p>
+        <h1>${t("bootTitle")}</h1>
+        <p>${t("bootText")}</p>
       </section>
       <section class="login-panel">
-        <h2>加载数据</h2>
-        <p>${supabase ? "正在连接 Supabase 数据库。" : "未配置 Supabase，正在使用本地演示数据。"}</p>
+        <div class="login-tools">${languageButton()}</div>
+        <h2>${t("loadingData")}</h2>
+        <p>${supabase ? t("connectingSupabase") : t("usingLocalData")}</p>
       </section>
     </div>
   `;
@@ -469,27 +807,28 @@ function renderLogin() {
   document.querySelector("#app").innerHTML = `
     <div class="login-page">
       <section class="login-visual">
-        <h1>汉语桥（小学组）现场评审</h1>
-        <p>面向评委现场评分、管理员实时查看进度与最终排名的简洁原型。配置 Supabase 后，数据会从数据库动态加载。</p>
+        <h1>${t("bootTitle")}</h1>
+        <p>${t("loginIntro")}</p>
       </section>
       <section class="login-panel">
-        <h2>登录</h2>
-        <p>${storageMode === "supabase" ? "当前已连接 Supabase 数据库。" : "当前未配置 Supabase，正在使用本地演示数据。"}</p>
+        <div class="login-tools">${languageButton()}</div>
+        <h2>${t("loginTitle")}</h2>
+        <p>${storageMode === "supabase" ? t("supabaseConnected") : t("localConnected")}</p>
         <form class="form" data-form="login">
           <div class="field">
-            <label for="username">账号</label>
+            <label for="username">${t("username")}</label>
             <input class="input" id="username" name="username" autocomplete="username" value="admin" />
           </div>
           <div class="field">
-            <label for="password">密码</label>
+            <label for="password">${t("password")}</label>
             <input class="input" id="password" name="password" type="password" autocomplete="current-password" value="admin123" />
           </div>
-          <button class="btn primary" type="submit">登录</button>
+          <button class="btn primary" type="submit">${t("login")}</button>
         </form>
         <div class="account-list">
-          <strong>演示账号</strong>
-          <span>管理员：admin / admin123</span>
-          <span>评委：judge1 到 judge6 / 123456</span>
+          <strong>${t("demoAccounts")}</strong>
+          <span>${t("adminDemo")}</span>
+          <span>${t("judgeDemo")}</span>
         </div>
       </section>
     </div>
@@ -501,19 +840,20 @@ function renderForceChangePassword() {
   document.querySelector("#app").innerHTML = `
     <div class="login-page">
       <section class="login-visual">
-        <h1>首次登录需要修改密码</h1>
-        <p>这是评委进入评分页前的强制步骤，用来模拟现场账号首次分发后的安全要求。</p>
+        <h1>${t("forceChangeTitle")}</h1>
+        <p>${t("forceChangeText")}</p>
       </section>
       <section class="login-panel">
+        <div class="login-tools">${languageButton()}</div>
         <h2>${escapeHtml(user.name)}</h2>
-        <p>请输入新密码后继续评分。</p>
+        <p>${t("enterNewPassword")}</p>
         <form class="form" data-form="change-password">
           <div class="field">
-            <label for="new-password">新密码</label>
+            <label for="new-password">${t("newPassword")}</label>
             <input class="input" id="new-password" name="password" type="password" minlength="6" required />
           </div>
-          <button class="btn primary" type="submit">保存并进入</button>
-          <button class="btn ghost" type="button" data-action="logout">返回登录</button>
+          <button class="btn primary" type="submit">${t("saveAndEnter")}</button>
+          <button class="btn ghost" type="button" data-action="logout">${t("backLogin")}</button>
         </form>
       </section>
     </div>
@@ -522,11 +862,11 @@ function renderForceChangePassword() {
 
 function renderAdminApp() {
   const nav = [
-    navButton("dashboard", "比赛概览", "▣"),
-    navButton("contestants", "参赛小朋友", "☷"),
-    navButton("judges", "评委账户", "◎"),
-    navButton("scores", "原始评分", "◇"),
-    navButton("results", "最终排名", "★")
+    navButton("dashboard", t("dashboard"), "▣"),
+    navButton("contestants", t("contestants"), "☷"),
+    navButton("judges", t("judges"), "◎"),
+    navButton("scores", t("rawScores"), "◇"),
+    navButton("results", t("results"), "★")
   ].join("");
 
   const content = {
@@ -547,8 +887,8 @@ function renderAdminDashboard() {
     return `
       <tr>
         <td>${escapeHtml(judge.name)}</td>
-        <td>${judge.hasLoggedIn ? "已登录" : "未登录"}</td>
-        <td>${judge.mustChangePassword ? "未修改" : "已修改"}</td>
+        <td>${judge.hasLoggedIn ? t("loggedIn") : t("notLoggedIn")}</td>
+        <td>${judge.mustChangePassword ? t("notChanged") : t("changed")}</td>
         <td>${saved}/${state.contestants.length}</td>
         <td><span class="badge ${statusClass(status)}">${statusText(status)}</span></td>
       </tr>
@@ -561,36 +901,36 @@ function renderAdminDashboard() {
   return `
     <section class="panel hero">
       <div class="hero-copy">
-        <h2>现场评分稳定、清晰、可追踪</h2>
-        <p>评委保存草稿并最终提交；管理员实时查看进度、退回修改、计算去最高最低后的最终排名。</p>
+        <h2>${t("overviewHeroTitle")}</h2>
+        <p>${t("overviewHeroText")}</p>
       </div>
       <div class="hero-stat">
-        <div class="stat-line"><span>参赛小朋友</span><strong>${state.contestants.length}</strong></div>
-        <div class="stat-line"><span>评委人数</span><strong>${judges().length}</strong></div>
-        <div class="stat-line"><span>已出正式排名</span><strong>${readyCount}</strong></div>
+        <div class="stat-line"><span>${t("contestantCount")}</span><strong>${state.contestants.length}</strong></div>
+        <div class="stat-line"><span>${t("judgeCount")}</span><strong>${judges().length}</strong></div>
+        <div class="stat-line"><span>${t("readyResults")}</span><strong>${readyCount}</strong></div>
       </div>
     </section>
     <section class="panel">
       <div class="panel-head">
         <div>
-          <h2>比赛概览</h2>
-          <p>当前显示本机演示数据，刷新后保存状态会保留。</p>
+          <h2>${t("overviewTitle")}</h2>
+          <p>${t("overviewText")}</p>
         </div>
       </div>
       <div class="panel-body">
         <div class="grid cols-3">
-          <div class="metric"><span>评委提交</span><strong>${submittedCount}/${judges().length}</strong></div>
-          <div class="metric"><span>评分项目</span><strong>${state.scoreItems.length}</strong></div>
-          <div class="metric"><span>赛区</span><strong>阿德莱德</strong></div>
+          <div class="metric"><span>${t("judgeSubmissions")}</span><strong>${submittedCount}/${judges().length}</strong></div>
+          <div class="metric"><span>${t("scoreItems")}</span><strong>${state.scoreItems.length}</strong></div>
+          <div class="metric"><span>${t("region")}</span><strong>Adelaide</strong></div>
         </div>
       </div>
     </section>
     <section class="panel">
-      <div class="panel-head"><h2>评分进度</h2></div>
+      <div class="panel-head"><h2>${t("progressTitle")}</h2></div>
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>评委</th><th>登录</th><th>首次改密</th><th>已评分</th><th>状态</th></tr>
+            <tr><th>${t("judge")}</th><th>${t("loginStatus")}</th><th>${t("changedInitialPassword")}</th><th>${t("scored")}</th><th>${t("status")}</th></tr>
           </thead>
           <tbody>${judgeRows.join("")}</tbody>
         </table>
@@ -621,15 +961,15 @@ function renderContestants() {
     <section class="panel">
       <div class="panel-head">
         <div>
-          <h2>参赛小朋友管理</h2>
-          <p>第一版先用内置名单模拟 Excel 导入后的数据结构。</p>
+          <h2>${t("contestantManagement")}</h2>
+          <p>${t("contestantText")}</p>
         </div>
-        <button class="btn primary" data-action="add-contestant">新增示例选手</button>
+        <button class="btn primary" data-action="add-contestant">${t("addSampleContestant")}</button>
       </div>
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>编号</th><th>姓名</th><th>年龄</th><th>组别</th><th>表演项目</th><th>出场顺序</th><th>备注</th></tr>
+            <tr><th>${t("number")}</th><th>${t("name")}</th><th>${t("age")}</th><th>${t("group")}</th><th>${t("performance")}</th><th>${t("order")}</th><th>${t("notes")}</th></tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
@@ -648,12 +988,12 @@ function renderJudges() {
           <td>${escapeHtml(judge.name)}</td>
           <td>${escapeHtml(judge.username)}</td>
           <td>${escapeHtml(judge.region)}</td>
-          <td>${judge.mustChangePassword ? "否" : "是"}</td>
+          <td>${judge.mustChangePassword ? t("no") : t("yes")}</td>
           <td>${progress}/${state.contestants.length}</td>
           <td><span class="badge ${statusClass(status)}">${statusText(status)}</span></td>
           <td class="actions">
-            <button class="btn ghost" data-action="reset-password" data-id="${judge.id}">重置密码</button>
-            <button class="btn danger" data-action="return-judge" data-id="${judge.id}" ${status === "not_started" ? "disabled" : ""}>退回修改</button>
+            <button class="btn ghost" data-action="reset-password" data-id="${judge.id}">${t("resetPassword")}</button>
+            <button class="btn danger" data-action="return-judge" data-id="${judge.id}" ${status === "not_started" ? "disabled" : ""}>${t("returnForEdit")}</button>
           </td>
         </tr>
       `;
@@ -664,39 +1004,39 @@ function renderJudges() {
     <section class="panel">
       <div class="panel-head">
         <div>
-          <h2>评委账户管理</h2>
-          <p>支持自定义评委姓名、登录账号和初始密码，也可以重置密码、退回已提交评分。</p>
+          <h2>${t("judgeManagement")}</h2>
+          <p>${t("judgeManagementText")}</p>
         </div>
       </div>
       <div class="panel-body">
         <form class="form" data-form="judge-account">
           <div class="grid cols-2">
             <div class="field">
-              <label for="judge-name">评委姓名</label>
-              <input class="input" id="judge-name" name="name" placeholder="例如：张老师" required />
+              <label for="judge-name">${t("judgeName")}</label>
+              <input class="input" id="judge-name" name="name" placeholder="Judge name" required />
             </div>
             <div class="field">
-              <label for="judge-username">登录账号</label>
-              <input class="input" id="judge-username" name="username" placeholder="例如：judge-zhang" required />
+              <label for="judge-username">${t("loginAccount")}</label>
+              <input class="input" id="judge-username" name="username" placeholder="judge-zhang" required />
             </div>
             <div class="field">
-              <label for="judge-region">赛区</label>
-              <input class="input" id="judge-region" name="region" value="阿德莱德赛区" required />
+              <label for="judge-region">${t("region")}</label>
+              <input class="input" id="judge-region" name="region" value="${currentLanguage === "zh" ? "阿德莱德赛区" : "Adelaide Region"}" required />
             </div>
             <div class="field">
-              <label for="judge-password">初始密码</label>
+              <label for="judge-password">${t("initialPassword")}</label>
               <input class="input" id="judge-password" name="password" value="123456" minlength="6" required />
             </div>
           </div>
           <div class="actions">
-            <button class="btn primary" type="submit">创建评委账号</button>
+            <button class="btn primary" type="submit">${t("createJudge")}</button>
           </div>
         </form>
       </div>
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>姓名</th><th>账号</th><th>赛区</th><th>已改密</th><th>进度</th><th>状态</th><th>操作</th></tr>
+            <tr><th>${t("name")}</th><th>${t("username")}</th><th>${t("region")}</th><th>${t("passwordChanged")}</th><th>${t("progress")}</th><th>${t("status")}</th><th>${t("actions")}</th></tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
@@ -730,13 +1070,13 @@ function renderRawScores() {
     <section class="panel">
       <div class="panel-head">
         <div>
-          <h2>原始评分查看</h2>
-          <p>按小朋友展示每位评委的总分和状态。</p>
+          <h2>${t("rawScores")}</h2>
+          <p>${t("rawScoresText")}</p>
         </div>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>编号</th><th>姓名</th>${headers}</tr></thead>
+          <thead><tr><th>${t("number")}</th><th>${t("name")}</th>${headers}</tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
@@ -764,7 +1104,7 @@ function renderResults() {
           ${judgeScoreCells}
           <td>${result.high === "" ? "-" : result.high.toFixed(1)}</td>
           <td>${result.low === "" ? "-" : result.low.toFixed(1)}</td>
-          <td><strong>${result.average || "待全部提交"}</strong></td>
+          <td><strong>${result.average || t("waitingAllSubmitted")}</strong></td>
         </tr>
       `;
     })
@@ -774,15 +1114,15 @@ function renderResults() {
     <section class="panel">
       <div class="panel-head">
         <div>
-          <h2>最终成绩与排名</h2>
-          <p>所有评委提交后自动去掉一个最高分和一个最低分，保留两位小数。</p>
+          <h2>${t("finalResultsTitle")}</h2>
+          <p>${t("finalResultsText")}</p>
         </div>
-        <button class="btn primary" data-action="export-csv">导出 CSV</button>
+        <button class="btn primary" data-action="export-csv">${t("exportCsv")}</button>
       </div>
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>排名</th><th>编号</th><th>姓名</th><th>组别</th><th>顺序</th>${judgeHeaders}<th>去掉最高</th><th>去掉最低</th><th>最终平均</th></tr>
+            <tr><th>${t("rank")}</th><th>${t("number")}</th><th>${t("name")}</th><th>${t("group")}</th><th>${t("sequence")}</th>${judgeHeaders}<th>${t("highDropped")}</th><th>${t("lowDropped")}</th><th>${t("finalAverage")}</th></tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
@@ -793,9 +1133,9 @@ function renderResults() {
 
 function renderJudgeApp() {
   const nav = [
-    navButton("judge-dashboard", "评分总览", "▣"),
-    navButton("judge-contestants", "参赛列表", "☷"),
-    navButton("judge-submit", "最终提交", "✓")
+    navButton("judge-dashboard", t("judgeDashboard"), "▣"),
+    navButton("judge-contestants", t("judgeContestants"), "☷"),
+    navButton("judge-submit", t("judgeSubmit"), "✓")
   ].join("");
 
   if (!state.activeView.startsWith("judge")) state.activeView = "judge-dashboard";
@@ -818,13 +1158,13 @@ function renderJudgeDashboard() {
   return `
     <section class="panel hero">
       <div class="hero-copy">
-        <h2>${escapeHtml(user.name)}，欢迎评分</h2>
-        <p>请按出场顺序完成所有小朋友评分。保存草稿后可以继续修改，最终提交后会锁定，除非管理员退回。</p>
+        <h2>${escapeHtml(user.name)}${currentLanguage === "zh" ? "，" : ", "}${t("welcomeScore")}</h2>
+        <p>${t("judgeHeroText")}</p>
       </div>
       <div class="hero-stat">
-        <div class="stat-line"><span>已评分</span><strong>${saved}/${state.contestants.length}</strong></div>
-        <div class="stat-line"><span>当前状态</span><strong>${statusText(status)}</strong></div>
-        <div class="stat-line"><span>满分</span><strong>100</strong></div>
+        <div class="stat-line"><span>${t("scored")}</span><strong>${saved}/${state.contestants.length}</strong></div>
+        <div class="stat-line"><span>${t("currentStatus")}</span><strong>${statusText(status)}</strong></div>
+        <div class="stat-line"><span>${t("fullScore")}</span><strong>100</strong></div>
       </div>
     </section>
     ${renderJudgeContestants()}
@@ -846,7 +1186,7 @@ function renderJudgeContestants() {
           <td>${escapeHtml(contestant.title)}</td>
           <td>${isValidScore(score.totalScore) ? Number(score.totalScore).toFixed(1) : "-"}</td>
           <td><span class="badge ${statusClass(score.status)}">${statusText(score.status)}</span></td>
-          <td><button class="btn primary" data-action="score-contestant" data-id="${contestant.id}" ${isLocked ? "disabled" : ""}>评分</button></td>
+          <td><button class="btn primary" data-action="score-contestant" data-id="${contestant.id}" ${isLocked ? "disabled" : ""}>${t("score")}</button></td>
         </tr>
       `;
     })
@@ -856,19 +1196,19 @@ function renderJudgeContestants() {
     <section class="panel">
       <div class="panel-head">
         <div>
-          <h2>参赛列表</h2>
-          <p>按出场顺序排列，所有小朋友都有总分后才能最终提交。</p>
+          <h2>${t("judgeContestants")}</h2>
+          <p>${t("contestantListText")}</p>
         </div>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>顺序</th><th>编号</th><th>姓名</th><th>项目</th><th>总分</th><th>状态</th><th>操作</th></tr></thead>
+          <thead><tr><th>${t("sequence")}</th><th>${t("number")}</th><th>${t("name")}</th><th>${t("performance")}</th><th>${t("totalScore")}</th><th>${t("status")}</th><th>${t("actions")}</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
       <div class="panel-body">
         <div class="actions">
-          <button class="btn primary" data-view="judge-submit">去最终提交</button>
+          <button class="btn primary" data-view="judge-submit">${t("goSubmit")}</button>
         </div>
       </div>
     </section>
@@ -885,19 +1225,19 @@ function renderJudgeSubmit() {
     <section class="panel">
       <div class="panel-head">
         <div>
-          <h2>最终提交</h2>
-          <p>提交前系统会检查每位小朋友都有 0 到 100 之间的总分。</p>
+          <h2>${t("submitTitle")}</h2>
+          <p>${t("submitText")}</p>
         </div>
       </div>
       <div class="panel-body grid">
         <div class="grid cols-3">
-          <div class="metric"><span>评分数量</span><strong>${scores.length - invalid.length}/${scores.length}</strong></div>
-          <div class="metric"><span>当前状态</span><strong>${statusText(status)}</strong></div>
-          <div class="metric"><span>待补评分</span><strong>${invalid.length}</strong></div>
+          <div class="metric"><span>${t("scoreCount")}</span><strong>${scores.length - invalid.length}/${scores.length}</strong></div>
+          <div class="metric"><span>${t("currentStatus")}</span><strong>${statusText(status)}</strong></div>
+          <div class="metric"><span>${t("missingScores")}</span><strong>${invalid.length}</strong></div>
         </div>
         <div class="actions">
-          <button class="btn primary" data-action="submit-all" ${invalid.length || status === "submitted" ? "disabled" : ""}>提交全部评分</button>
-          <button class="btn ghost" data-view="judge-contestants">返回参赛列表</button>
+          <button class="btn primary" data-action="submit-all" ${invalid.length || status === "submitted" ? "disabled" : ""}>${t("submitAll")}</button>
+          <button class="btn ghost" data-view="judge-contestants">${t("backContestants")}</button>
         </div>
       </div>
     </section>
@@ -912,7 +1252,7 @@ function renderScoreForm(contestantId) {
     .map(
       (item) => `
         <div class="score-item">
-          <span>${escapeHtml(item.name)}（满分 ${item.max}）</span>
+          <span>${escapeHtml(scoreItemName(item))}${currentLanguage === "zh" ? `（${t("maxScore")} ${item.max}）` : ` (${t("maxScore")} ${item.max})`}</span>
           <input class="input" type="number" min="0" max="${item.max}" step="0.5" name="detail-${item.id}" value="${escapeHtml(score.details[item.id] ?? "")}" />
         </div>
       `
@@ -925,36 +1265,36 @@ function renderScoreForm(contestantId) {
         <div class="panel-head">
           <div>
             <h2>${escapeHtml(contestant.name)} · ${escapeHtml(contestant.number)}</h2>
-            <p>${escapeHtml(contestant.title)}，出场顺序 ${contestant.order}，${escapeHtml(contestant.group)}</p>
+            <p>${escapeHtml(contestant.title)}${currentLanguage === "zh" ? "，" : ", "}${t("order")} ${contestant.order}${currentLanguage === "zh" ? "，" : ", "}${escapeHtml(contestant.group)}</p>
           </div>
-          <button class="btn ghost" data-view="judge-contestants">返回</button>
+          <button class="btn ghost" data-view="judge-contestants">${t("back")}</button>
         </div>
         <div class="panel-body">
           <form class="form" data-form="score" data-id="${contestant.id}">
             <div>
-              <h3 class="section-title">评分细则</h3>
-              <p class="muted">细则可选填；填写后会自动汇总到总分，评委仍可手动调整总分。</p>
+              <h3 class="section-title">${t("scoreDetails")}</h3>
+              <p class="muted">${t("detailsHint")}</p>
             </div>
             <div class="score-grid">${detailInputs}</div>
             <div class="grid cols-2">
               <div class="field">
-                <label for="total-score">总分（必填，0-100）</label>
+                <label for="total-score">${t("totalScoreRequired")}</label>
                 <input class="input" id="total-score" name="totalScore" type="number" min="0" max="100" step="0.5" value="${escapeHtml(score.totalScore)}" required />
               </div>
               <div class="field">
-                <label for="comment">评语（选填）</label>
+                <label for="comment">${t("commentOptional")}</label>
                 <textarea class="textarea" id="comment" name="comment">${escapeHtml(score.comment)}</textarea>
               </div>
             </div>
             <div class="actions">
-              <button class="btn primary" type="submit">Save 保存</button>
-              <button class="btn ghost" type="button" data-view="judge-submit">去最终提交</button>
+              <button class="btn primary" type="submit">${t("save")}</button>
+              <button class="btn ghost" type="button" data-view="judge-submit">${t("goSubmit")}</button>
             </div>
           </form>
         </div>
       </section>
     `,
-    [navButton("judge-dashboard", "评分总览", "▣"), navButton("judge-contestants", "参赛列表", "☷"), navButton("judge-submit", "最终提交", "✓")].join("")
+    [navButton("judge-dashboard", t("judgeDashboard"), "▣"), navButton("judge-contestants", t("judgeContestants"), "☷"), navButton("judge-submit", t("judgeSubmit"), "✓")].join("")
   );
 }
 
@@ -970,7 +1310,7 @@ document.addEventListener("submit", (event) => {
     const user = state.users.find((item) => item.username === username && item.password === password);
 
     if (!user) {
-      showToast("账号或密码不正确");
+      showToast(t("invalidLogin"));
       return;
     }
 
@@ -986,13 +1326,13 @@ document.addEventListener("submit", (event) => {
     const user = currentUser();
     const password = String(new FormData(form).get("password"));
     if (password.length < 6) {
-      showToast("新密码至少 6 位");
+      showToast(t("passwordMin"));
       return;
     }
     user.password = password;
     user.mustChangePassword = false;
     saveState();
-    showToast("密码已修改");
+    showToast(t("passwordChangedToast"));
     render();
     return;
   }
@@ -1005,12 +1345,12 @@ document.addEventListener("submit", (event) => {
     const password = String(formData.get("password"));
 
     if (!name || !username || !region) {
-      showToast("请填写评委姓名、登录账号和赛区");
+      showToast(t("fillJudgeFields"));
       return;
     }
 
     if (password.length < 6) {
-      showToast("初始密码至少 6 位");
+      showToast(t("initialPasswordMin"));
       return;
     }
 
@@ -1019,7 +1359,7 @@ document.addEventListener("submit", (event) => {
     );
 
     if (usernameExists) {
-      showToast("这个登录账号已经存在");
+      showToast(t("usernameExists"));
       return;
     }
 
@@ -1034,7 +1374,7 @@ document.addEventListener("submit", (event) => {
       hasLoggedIn: false
     });
     saveState();
-    showToast(`已创建 ${name} / ${username}`);
+    showToast(`${t("createdJudge")} ${name} / ${username}`);
     form.reset();
     render();
     return;
@@ -1047,7 +1387,7 @@ document.addEventListener("submit", (event) => {
     const totalScore = String(formData.get("totalScore"));
 
     if (!isValidScore(totalScore)) {
-      showToast("总分必须在 0 到 100 之间");
+      showToast(t("totalScoreInvalid"));
       return;
     }
 
@@ -1073,7 +1413,7 @@ document.addEventListener("submit", (event) => {
     });
 
     dirtyScore = false;
-    showToast("评分已保存");
+    showToast(t("scoreSaved"));
     render();
   }
 });
@@ -1109,7 +1449,7 @@ document.addEventListener("click", (event) => {
 
   const view = target.dataset.view;
   if (view) {
-    if (dirtyScore && !confirm("当前评分尚未保存，确定离开吗？")) return;
+    if (dirtyScore && !confirm(t("unsavedLeave"))) return;
     dirtyScore = false;
     state.activeView = view;
     saveState();
@@ -1120,8 +1460,15 @@ document.addEventListener("click", (event) => {
   const action = target.dataset.action;
   if (!action) return;
 
+  if (action === "toggle-language") {
+    currentLanguage = currentLanguage === "zh" ? "en" : "zh";
+    localStorage.setItem(LANGUAGE_KEY, currentLanguage);
+    render();
+    return;
+  }
+
   if (action === "logout") {
-    if (dirtyScore && !confirm("当前评分尚未保存，确定退出吗？")) return;
+    if (dirtyScore && !confirm(t("unsavedLogout"))) return;
     state.currentUserId = null;
     dirtyScore = false;
     saveState();
@@ -1129,7 +1476,7 @@ document.addEventListener("click", (event) => {
   }
 
   if (action === "reset-demo") {
-    if (!confirm("确定重置所有演示数据吗？")) return;
+    if (!confirm(t("confirmReset"))) return;
     state = structuredClone(seedData);
     saveState();
     render();
@@ -1143,22 +1490,22 @@ document.addEventListener("click", (event) => {
     const user = currentUser();
     const invalid = scoresForJudge(user.id).filter((score) => !isValidScore(score.totalScore));
     if (invalid.length) {
-      showToast("还有小朋友未完成评分");
+      showToast(t("missingAllScores"));
       return;
     }
-    if (!confirm("提交后评分将锁定，确定提交全部评分吗？")) return;
+    if (!confirm(t("confirmSubmit"))) return;
 
     state.contestants.forEach((contestant) => {
       const score = getScore(user.id, contestant.id);
       setScore({ ...score, status: "submitted", submittedAt: new Date().toISOString() });
     });
-    showToast("已提交全部评分");
+    showToast(t("allSubmitted"));
     render();
   }
 
   if (action === "return-judge") {
     const judgeId = target.dataset.id;
-    const reason = prompt("请输入退回原因（可留空）：", "需要重新核对评分");
+    const reason = prompt(t("returnReasonPrompt"), t("returnReasonDefault"));
     state.contestants.forEach((contestant) => {
       const score = getScore(judgeId, contestant.id);
       if (score.status !== "not_started") {
@@ -1181,7 +1528,7 @@ document.addEventListener("click", (event) => {
       createdAt: new Date().toISOString()
     });
     saveState();
-    showToast("已退回评委评分");
+    showToast(t("returnedToast"));
     render();
   }
 
@@ -1190,7 +1537,7 @@ document.addEventListener("click", (event) => {
     judge.password = "123456";
     judge.mustChangePassword = true;
     saveState();
-    showToast(`${judge.name} 密码已重置为 123456`);
+    showToast(`${judge.name} ${t("passwordResetTo")} 123456`);
     render();
   }
 
@@ -1199,15 +1546,15 @@ document.addEventListener("click", (event) => {
     state.contestants.push({
       id: crypto.randomUUID(),
       number: `A${String(index).padStart(3, "0")}`,
-      name: `示例选手 ${index}`,
+      name: `${t("sampleContestant")} ${index}`,
       age: 9,
-      group: "小学组",
-      title: "中文展示",
+      group: currentLanguage === "zh" ? "小学组" : "Primary Group",
+      title: t("chineseShow"),
       order: index,
       notes: ""
     });
     saveState();
-    showToast("已新增示例选手");
+    showToast(t("sampleAdded"));
     render();
   }
 
@@ -1218,15 +1565,15 @@ document.addEventListener("click", (event) => {
 
 function exportResultsCsv() {
   const headers = [
-    "排名",
-    "编号",
-    "姓名",
-    "组别",
-    "出场顺序",
-    ...judges().map((judge) => `${judge.name}总分`),
-    "去掉最高分",
-    "去掉最低分",
-    "最终平均分"
+    t("rank"),
+    t("number"),
+    t("name"),
+    t("group"),
+    t("order"),
+    ...judges().map((judge) => `${judge.name} ${t("totalScore")}`),
+    t("highDropped"),
+    t("lowDropped"),
+    t("finalAverage")
   ];
 
   const rows = rankedContestants().map(({ contestant, result, rank }) => [
@@ -1252,10 +1599,10 @@ function exportResultsCsv() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "汉语桥最终排名.csv";
+  link.download = currentLanguage === "zh" ? "汉语桥最终排名.csv" : "chinese-bridge-final-ranking.csv";
   link.click();
   URL.revokeObjectURL(url);
-  showToast("CSV 已导出");
+  showToast(t("csvExported"));
 }
 
 window.addEventListener("beforeunload", (event) => {
@@ -1272,7 +1619,7 @@ async function boot() {
     console.error(error);
     storageMode = "local";
     state = mergeState(loadLocalJson(STORAGE_KEY, dataPayloadFromState(seedData)));
-    showToast("数据加载失败，已使用本地演示数据");
+    showToast(t("dataLoadFailed"));
   } finally {
     isBooting = false;
     render();
