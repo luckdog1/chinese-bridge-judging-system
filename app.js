@@ -1,4 +1,12 @@
+import { createClient } from "@supabase/supabase-js";
+
 const STORAGE_KEY = "chinese-bridge-review-demo-v1";
+const SESSION_KEY = "chinese-bridge-review-session-v1";
+const SUPABASE_STATE_ID = "main";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase =
+  SUPABASE_URL && SUPABASE_ANON_KEY ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 const seedData = {
   currentUserId: null,
@@ -127,23 +135,113 @@ const seedData = {
   auditLogs: []
 };
 
-let state = loadState();
+let state = structuredClone(seedData);
 let toastTimer = null;
 let dirtyScore = false;
+let isBooting = true;
+let storageMode = supabase ? "supabase" : "local";
+let saveTimer = null;
 
-function loadState() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return structuredClone(seedData);
+function loadLocalJson(key, fallback) {
+  const raw = localStorage.getItem(key);
+  if (!raw) return structuredClone(fallback);
 
   try {
-    return { ...structuredClone(seedData), ...JSON.parse(raw) };
+    return JSON.parse(raw);
   } catch {
-    return structuredClone(seedData);
+    return structuredClone(fallback);
   }
 }
 
+function localSession() {
+  return {
+    currentUserId: null,
+    activeView: "dashboard",
+    ...loadLocalJson(SESSION_KEY, {})
+  };
+}
+
+function dataPayloadFromState(source) {
+  return {
+    users: source.users,
+    contestants: source.contestants,
+    scoreItems: source.scoreItems,
+    scores: source.scores,
+    auditLogs: source.auditLogs
+  };
+}
+
+function mergeState(payload) {
+  const session = localSession();
+  return {
+    ...structuredClone(seedData),
+    ...payload,
+    currentUserId: session.currentUserId,
+    activeView: session.activeView || "dashboard"
+  };
+}
+
+async function loadState() {
+  if (!supabase) {
+    return mergeState(loadLocalJson(STORAGE_KEY, dataPayloadFromState(seedData)));
+  }
+
+  const { data, error } = await supabase
+    .from("judging_state")
+    .select("payload")
+    .eq("id", SUPABASE_STATE_ID)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    storageMode = "local";
+    return mergeState(loadLocalJson(STORAGE_KEY, dataPayloadFromState(seedData)));
+  }
+
+  if (!data?.payload) {
+    const initialPayload = dataPayloadFromState(seedData);
+    await saveRemotePayload(initialPayload);
+    return mergeState(initialPayload);
+  }
+
+  return mergeState(data.payload);
+}
+
+async function saveRemotePayload(payload) {
+  const { error } = await supabase.from("judging_state").upsert({
+    id: SUPABASE_STATE_ID,
+    payload,
+    updated_at: new Date().toISOString()
+  });
+
+  if (error) throw error;
+}
+
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  localStorage.setItem(
+    SESSION_KEY,
+    JSON.stringify({
+      currentUserId: state.currentUserId,
+      activeView: state.activeView
+    })
+  );
+
+  const payload = dataPayloadFromState(state);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+
+  if (!supabase || storageMode !== "supabase") return;
+
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try {
+      await saveRemotePayload(payload);
+    } catch (error) {
+      console.error(error);
+      storageMode = "local";
+      showToast("Supabase 保存失败，已临时切换为本地保存");
+      render();
+    }
+  }, 150);
 }
 
 function roleLabel(role) {
@@ -287,6 +385,7 @@ function escapeHtml(value) {
 function appShell(content, nav) {
   const user = currentUser();
   const role = roleLabel(user.role);
+  const storageLabel = storageMode === "supabase" ? "Supabase 数据库" : "本地演示数据";
 
   return `
     <div class="shell">
@@ -299,8 +398,9 @@ function appShell(content, nav) {
           </div>
         </div>
         <div class="userbar">
+          <span class="badge ${storageMode === "supabase" ? "ok" : "warn"}">${storageLabel}</span>
           <span class="badge">${escapeHtml(user.name)} · ${role}</span>
-          <button class="btn ghost" data-action="reset-demo">重置演示数据</button>
+          <button class="btn ghost" data-action="reset-demo">重置数据</button>
           <button class="btn" data-action="logout">退出</button>
         </div>
       </header>
@@ -321,10 +421,26 @@ function navButton(view, label, icon) {
 }
 
 function render() {
+  if (isBooting) return renderBooting();
   const user = currentUser();
   if (!user) return renderLogin();
   if (user.mustChangePassword) return renderForceChangePassword();
   return user.role === "judge" ? renderJudgeApp() : renderAdminApp();
+}
+
+function renderBooting() {
+  document.querySelector("#app").innerHTML = `
+    <div class="login-page">
+      <section class="login-visual">
+        <h1>汉语桥（小学组）现场评审</h1>
+        <p>正在加载比赛数据，请稍候。</p>
+      </section>
+      <section class="login-panel">
+        <h2>加载数据</h2>
+        <p>${supabase ? "正在连接 Supabase 数据库。" : "未配置 Supabase，正在使用本地演示数据。"}</p>
+      </section>
+    </div>
+  `;
 }
 
 function renderLogin() {
@@ -332,11 +448,11 @@ function renderLogin() {
     <div class="login-page">
       <section class="login-visual">
         <h1>汉语桥（小学组）现场评审</h1>
-        <p>面向评委现场评分、管理员实时查看进度与最终排名的简洁原型。数据暂存在本机浏览器中，刷新后仍会保留。</p>
+        <p>面向评委现场评分、管理员实时查看进度与最终排名的简洁原型。配置 Supabase 后，数据会从数据库动态加载。</p>
       </section>
       <section class="login-panel">
         <h2>登录</h2>
-        <p>先用演示账号体验流程，后续可接入 Next.js、Prisma 和 PostgreSQL。</p>
+        <p>${storageMode === "supabase" ? "当前已连接 Supabase 数据库。" : "当前未配置 Supabase，正在使用本地演示数据。"}</p>
         <form class="form" data-form="login">
           <div class="field">
             <label for="username">账号</label>
@@ -1062,4 +1178,19 @@ window.addEventListener("beforeunload", (event) => {
   event.returnValue = "";
 });
 
-render();
+async function boot() {
+  render();
+  try {
+    state = await loadState();
+  } catch (error) {
+    console.error(error);
+    storageMode = "local";
+    state = mergeState(loadLocalJson(STORAGE_KEY, dataPayloadFromState(seedData)));
+    showToast("数据加载失败，已使用本地演示数据");
+  } finally {
+    isBooting = false;
+    render();
+  }
+}
+
+boot();

@@ -9,6 +9,15 @@ npm install
 npm run dev
 ```
 
+## Supabase
+
+1. Create a Supabase project.
+2. Open the Supabase SQL Editor and run `supabase-schema.sql`.
+3. Copy `.env.example` to `.env`.
+4. Fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+
+Without these environment variables, the app falls back to local demo data.
+
 ## Build
 
 ```bash
