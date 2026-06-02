@@ -320,6 +320,28 @@ function isValidScore(value) {
   return value !== "" && Number.isFinite(number) && number >= 0 && number <= 100;
 }
 
+function validateScoreDetails(details) {
+  for (const item of state.scoreItems) {
+    const rawValue = details[item.id];
+    if (rawValue === "" || rawValue === undefined || rawValue === null) continue;
+
+    const value = Number(rawValue);
+    if (!Number.isFinite(value)) {
+      return `${item.name}必须是数字`;
+    }
+
+    if (value < 0) {
+      return `${item.name}不能小于 0`;
+    }
+
+    if (value > item.max) {
+      return `${item.name}不能超过 ${item.max} 分`;
+    }
+  }
+
+  return "";
+}
+
 function calculateResult(contestantId) {
   const submittedScores = judges()
     .map((judge) => getScore(judge.id, contestantId))
@@ -643,9 +665,33 @@ function renderJudges() {
       <div class="panel-head">
         <div>
           <h2>评委账户管理</h2>
-          <p>支持批量生成、重置密码、退回已提交评分。这里先做可交互演示。</p>
+          <p>支持自定义评委姓名、登录账号和初始密码，也可以重置密码、退回已提交评分。</p>
         </div>
-        <button class="btn primary" data-action="generate-judge">生成评委账号</button>
+      </div>
+      <div class="panel-body">
+        <form class="form" data-form="judge-account">
+          <div class="grid cols-2">
+            <div class="field">
+              <label for="judge-name">评委姓名</label>
+              <input class="input" id="judge-name" name="name" placeholder="例如：张老师" required />
+            </div>
+            <div class="field">
+              <label for="judge-username">登录账号</label>
+              <input class="input" id="judge-username" name="username" placeholder="例如：judge-zhang" required />
+            </div>
+            <div class="field">
+              <label for="judge-region">赛区</label>
+              <input class="input" id="judge-region" name="region" value="阿德莱德赛区" required />
+            </div>
+            <div class="field">
+              <label for="judge-password">初始密码</label>
+              <input class="input" id="judge-password" name="password" value="123456" minlength="6" required />
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn primary" type="submit">创建评委账号</button>
+          </div>
+        </form>
       </div>
       <div class="table-wrap">
         <table>
@@ -820,6 +866,11 @@ function renderJudgeContestants() {
           <tbody>${rows}</tbody>
         </table>
       </div>
+      <div class="panel-body">
+        <div class="actions">
+          <button class="btn primary" data-view="judge-submit">去最终提交</button>
+        </div>
+      </div>
     </section>
   `;
 }
@@ -946,6 +997,49 @@ document.addEventListener("submit", (event) => {
     return;
   }
 
+  if (formType === "judge-account") {
+    const formData = new FormData(form);
+    const name = String(formData.get("name")).trim();
+    const username = String(formData.get("username")).trim();
+    const region = String(formData.get("region")).trim();
+    const password = String(formData.get("password"));
+
+    if (!name || !username || !region) {
+      showToast("请填写评委姓名、登录账号和赛区");
+      return;
+    }
+
+    if (password.length < 6) {
+      showToast("初始密码至少 6 位");
+      return;
+    }
+
+    const usernameExists = state.users.some(
+      (user) => user.username.toLowerCase() === username.toLowerCase()
+    );
+
+    if (usernameExists) {
+      showToast("这个登录账号已经存在");
+      return;
+    }
+
+    state.users.push({
+      id: crypto.randomUUID(),
+      name,
+      username,
+      password,
+      role: "judge",
+      region,
+      mustChangePassword: true,
+      hasLoggedIn: false
+    });
+    saveState();
+    showToast(`已创建 ${name} / ${username}`);
+    form.reset();
+    render();
+    return;
+  }
+
   if (formType === "score") {
     const user = currentUser();
     const contestantId = form.dataset.id;
@@ -960,15 +1054,21 @@ document.addEventListener("submit", (event) => {
     const details = {};
     state.scoreItems.forEach((item) => {
       const value = String(formData.get(`detail-${item.id}`));
-      if (value !== "") details[item.id] = Number(value);
+      if (value !== "") details[item.id] = value;
     });
+
+    const detailsError = validateScoreDetails(details);
+    if (detailsError) {
+      showToast(detailsError);
+      return;
+    }
 
     const oldScore = getScore(user.id, contestantId);
     setScore({
       ...oldScore,
       totalScore,
       comment: String(formData.get("comment")),
-      details,
+      details: Object.fromEntries(Object.entries(details).map(([key, value]) => [key, Number(value)])),
       status: oldScore.status === "returned" ? "returned" : "draft"
     });
 
@@ -991,7 +1091,10 @@ document.addEventListener("input", (event) => {
     const input = form.elements[`detail-${item.id}`];
     if (input.value !== "") {
       hasDetail = true;
-      sum += Number(input.value);
+      const value = Number(input.value);
+      if (Number.isFinite(value) && value >= 0 && value <= item.max) {
+        sum += value;
+      }
     }
   });
 
@@ -1088,23 +1191,6 @@ document.addEventListener("click", (event) => {
     judge.mustChangePassword = true;
     saveState();
     showToast(`${judge.name} 密码已重置为 123456`);
-    render();
-  }
-
-  if (action === "generate-judge") {
-    const index = judges().length + 1;
-    state.users.push({
-      id: crypto.randomUUID(),
-      name: `评委 ${index}`,
-      username: `judge${index}`,
-      password: "123456",
-      role: "judge",
-      region: "阿德莱德赛区",
-      mustChangePassword: true,
-      hasLoggedIn: false
-    });
-    saveState();
-    showToast(`已生成 judge${index} / 123456`);
     render();
   }
 
