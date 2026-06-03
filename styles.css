@@ -68,18 +68,6 @@ button:disabled {
   min-width: 0;
 }
 
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 8px;
-  background: var(--brand);
-  color: #fff;
-  font-weight: 800;
-  flex: 0 0 auto;
-}
-
 .brand h1 {
   margin: 0;
   font-size: 20px;
@@ -408,6 +396,11 @@ th {
 .textarea {
   min-height: 96px;
   resize: vertical;
+}
+
+.draw-order-input {
+  width: 90px;
+  min-width: 90px;
 }
 
 .score-grid {

@@ -4,6 +4,7 @@ const STORAGE_KEY = "chinese-bridge-review-demo-v1";
 const SESSION_KEY = "chinese-bridge-review-session-v1";
 const LANGUAGE_KEY = "chinese-bridge-review-language-v1";
 const SUPABASE_STATE_ID = "main";
+const DATA_VERSION = 3;
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase =
@@ -11,7 +12,7 @@ const supabase =
 
 const I18N = {
   zh: {
-    appTitle: "汉语桥评审系统",
+    appTitle: "汉语桥评价系统",
     eventTitle: "小学组 · 阿德莱德赛区 · 总决赛",
     bridgeMark: "桥",
     languageButton: "English",
@@ -34,7 +35,7 @@ const I18N = {
     notChanged: "未修改",
     yes: "是",
     no: "否",
-    bootTitle: "汉语桥（小学组）现场评审",
+    bootTitle: "汉语桥（小学组）现场评分评价",
     bootText: "正在加载比赛数据，请稍候。",
     loadingData: "加载数据",
     connectingSupabase: "正在连接 Supabase 数据库。",
@@ -88,6 +89,13 @@ const I18N = {
     group: "组别",
     performance: "表演项目",
     order: "出场顺序",
+    drawOrder: "抽签顺序",
+    drawOrderHint: "现场抽签后在这里填写顺序，保存后评委端会按该顺序排列。",
+    saveDrawOrder: "保存抽签顺序",
+    drawOrderSaved: "抽签顺序已保存",
+    pendingDraw: "待抽签",
+    drawOrderInvalid: "抽签顺序必须是正整数",
+    drawOrderDuplicate: "抽签顺序不能重复",
     notes: "备注",
     judgeManagement: "评委账户管理",
     judgeManagementText: "支持自定义评委姓名、登录账号、赛区和初始密码，也可以重置密码、退回已提交评分。",
@@ -174,7 +182,7 @@ const I18N = {
     points: "分"
   },
   en: {
-    appTitle: "Chinese Bridge Judging System",
+    appTitle: "Chinese Bridge Competition Scoring and Evaluation System",
     eventTitle: "Primary Group · Adelaide Region · Final",
     bridgeMark: "桥",
     languageButton: "中文",
@@ -197,7 +205,7 @@ const I18N = {
     notChanged: "Not changed",
     yes: "Yes",
     no: "No",
-    bootTitle: "Chinese Bridge Primary Group Judging",
+    bootTitle: "Chinese Bridge Primary Group Scoring and Evaluation",
     bootText: "Loading contest data. Please wait.",
     loadingData: "Loading data",
     connectingSupabase: "Connecting to Supabase.",
@@ -251,6 +259,13 @@ const I18N = {
     group: "Group",
     performance: "Performance",
     order: "Order",
+    drawOrder: "Draw Order",
+    drawOrderHint: "Enter the draw order after the on-site draw. Judges will see contestants in this saved order.",
+    saveDrawOrder: "Save Draw Order",
+    drawOrderSaved: "Draw order saved",
+    pendingDraw: "Pending draw",
+    drawOrderInvalid: "Draw order must be a positive integer",
+    drawOrderDuplicate: "Draw orders cannot be duplicated",
     notes: "Notes",
     judgeManagement: "Judge Account Management",
     judgeManagementText: "Create custom judge names, usernames, regions, and initial passwords. Reset passwords or return submitted scores for editing.",
@@ -398,6 +413,7 @@ const RUBRIC_REFERENCE = [
 ];
 
 const seedData = {
+  dataVersion: DATA_VERSION,
   currentUserId: null,
   activeView: "dashboard",
   users: [
@@ -483,7 +499,7 @@ const seedData = {
       story: "《我和中文的“较量”》\"My Challenge with Chinese\"",
       talent: "《中国话》\"Chinese Language\"",
       title: "故事：《我和中文的“较量”》\"My Challenge with Chinese\" / 才艺：《中国话》\"Chinese Language\"",
-      order: 1,
+      order: "",
       notes: "Walford Anglican School for girls"
     },
     {
@@ -496,7 +512,7 @@ const seedData = {
       story: "《猴子捞月》\"The Monkey Tries to Catch the Moon\"",
       talent: "《我有心声》\"I have a voice\"",
       title: "故事：《猴子捞月》\"The Monkey Tries to Catch the Moon\" / 才艺：《我有心声》\"I have a voice\"",
-      order: 2,
+      order: "",
       notes: "Plympton International College"
     },
     {
@@ -509,7 +525,7 @@ const seedData = {
       story: "《神奇的汉字》\"Magic Chinese Characters\"",
       talent: "古筝演奏 Guzheng Performance",
       title: "故事：《神奇的汉字》\"Magic Chinese Characters\" / 才艺：古筝演奏 Guzheng Performance",
-      order: 3,
+      order: "",
       notes: "Plympton International College"
     },
     {
@@ -522,7 +538,7 @@ const seedData = {
       story: "《花木兰》\"Hua Mulan\"",
       talent: "《雪绒花》\"Edelweiss\"",
       title: "故事：《花木兰》\"Hua Mulan\" / 才艺：《雪绒花》\"Edelweiss\"",
-      order: 4,
+      order: "",
       notes: "Plympton International College"
     },
     {
@@ -535,7 +551,7 @@ const seedData = {
       story: "《狐狸和葡萄》\"The Fox and the Grapes\"",
       talent: "《春天在哪里》\"Where is Spring\"",
       title: "故事：《狐狸和葡萄》\"The Fox and the Grapes\" / 才艺：《春天在哪里》\"Where is Spring\"",
-      order: 5,
+      order: "",
       notes: "Prince Alfred College"
     },
     {
@@ -548,7 +564,7 @@ const seedData = {
       story: "《屈原的故事》\"The Story of Qu Yuan\"",
       talent: "《刀剑如梦》\"A Life of Fighting is but a Dream\"",
       title: "故事：《屈原的故事》\"The Story of Qu Yuan\" / 才艺：《刀剑如梦》\"A Life of Fighting is but a Dream\"",
-      order: 6,
+      order: "",
       notes: "Prince Alfred College"
     },
     {
@@ -561,7 +577,7 @@ const seedData = {
       story: "《哈尔滨》\"Harbin\"",
       talent: "写汉字 Chinese Character Writing",
       title: "故事：《哈尔滨》\"Harbin\" / 才艺：写汉字 Chinese Character Writing",
-      order: 7,
+      order: "",
       notes: "Pulteney Grammar School"
     },
     {
@@ -574,7 +590,7 @@ const seedData = {
       story: "《哈尔滨》\"Harbin\"",
       talent: "舞狮表演 Chinese Lion Dance",
       title: "故事：《哈尔滨》\"Harbin\" / 才艺：舞狮表演 Chinese Lion Dance",
-      order: 8,
+      order: "",
       notes: "Pulteney Grammar School"
     },
     {
@@ -587,7 +603,7 @@ const seedData = {
       story: "《香港》\"Hongkong\"",
       talent: "中国鼓表演 Chinese Drum Performance",
       title: "故事：《香港》\"Hongkong\" / 才艺：中国鼓表演 Chinese Drum Performance",
-      order: 9,
+      order: "",
       notes: "Pulteney Grammar School"
     }
   ],
@@ -641,6 +657,24 @@ function contestantPerformance(contestant) {
   return story || talent || contestant.title || "";
 }
 
+function drawOrderValue(contestant) {
+  const order = Number(contestant.order);
+  return Number.isInteger(order) && order > 0 ? order : null;
+}
+
+function drawOrderLabel(contestant) {
+  return drawOrderValue(contestant) ?? t("pendingDraw");
+}
+
+function sortByDrawOrder(a, b) {
+  const orderA = drawOrderValue(a);
+  const orderB = drawOrderValue(b);
+  if (orderA !== null && orderB !== null) return orderA - orderB;
+  if (orderA !== null) return -1;
+  if (orderB !== null) return 1;
+  return String(a.number || "").localeCompare(String(b.number || ""));
+}
+
 function needsOfficialContestantMigration(payload) {
   const contestants = payload?.contestants || [];
   const oldDemoNames = ["李明悦", "陈思远", "王可欣", "赵一诺"];
@@ -661,6 +695,16 @@ function needsRubricMigration(payload) {
   const expectedIds = seedData.scoreItems.map((item) => item.id).join("|");
   const currentIds = scoreItems.map((item) => item.id).join("|");
   return currentIds !== expectedIds || scoreItems.some((item) => item.max !== 20);
+}
+
+function needsDrawOrderMigration(payload) {
+  const contestants = payload?.contestants || [];
+  const version = Number(payload?.dataVersion || 0);
+  return (
+    version < DATA_VERSION &&
+    contestants.length === seedData.contestants.length &&
+    contestants.every((contestant, index) => Number(contestant.order) === index + 1)
+  );
 }
 
 function languageButton() {
@@ -727,16 +771,29 @@ function loadLocalJson(key, fallback) {
   }
 }
 
+function loadSessionJson(fallback) {
+  const raw = sessionStorage.getItem(SESSION_KEY);
+  if (!raw) return structuredClone(fallback);
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return structuredClone(fallback);
+  }
+}
+
 function localSession() {
+  localStorage.removeItem(SESSION_KEY);
   return {
     currentUserId: null,
     activeView: "dashboard",
-    ...loadLocalJson(SESSION_KEY, {})
+    ...loadSessionJson({})
   };
 }
 
 function dataPayloadFromState(source) {
   return {
+    dataVersion: DATA_VERSION,
     users: source.users,
     contestants: source.contestants,
     scoreItems: source.scoreItems,
@@ -761,11 +818,18 @@ async function loadState() {
     if (needsOfficialContestantMigration(localPayload)) {
       localPayload.contestants = structuredClone(seedData.contestants);
       localPayload.scores = {};
+      localPayload.dataVersion = DATA_VERSION;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(localPayload));
     }
     if (needsRubricMigration(localPayload)) {
       localPayload.scoreItems = structuredClone(seedData.scoreItems);
       localPayload.scores = {};
+      localPayload.dataVersion = DATA_VERSION;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(localPayload));
+    }
+    if (needsDrawOrderMigration(localPayload)) {
+      localPayload.contestants = localPayload.contestants.map((contestant) => ({ ...contestant, order: "" }));
+      localPayload.dataVersion = DATA_VERSION;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(localPayload));
     }
     return mergeState(localPayload);
@@ -791,17 +855,23 @@ async function loadState() {
 
   const shouldMigrateContestants = needsOfficialContestantMigration(data.payload);
   const shouldMigrateRubric = needsRubricMigration(data.payload);
+  const shouldMigrateDrawOrder = needsDrawOrderMigration(data.payload);
 
-  if (shouldMigrateContestants || shouldMigrateRubric) {
+  if (shouldMigrateContestants || shouldMigrateRubric || shouldMigrateDrawOrder) {
+    const migratedContestants = shouldMigrateContestants
+      ? structuredClone(seedData.contestants)
+      : shouldMigrateDrawOrder
+        ? data.payload.contestants.map((contestant) => ({ ...contestant, order: "" }))
+        : data.payload.contestants;
+
     const migratedPayload = {
       ...data.payload,
-      contestants: shouldMigrateContestants
-        ? structuredClone(seedData.contestants)
-        : data.payload.contestants,
+      dataVersion: DATA_VERSION,
+      contestants: migratedContestants,
       scoreItems: shouldMigrateRubric
         ? structuredClone(seedData.scoreItems)
         : data.payload.scoreItems,
-      scores: {}
+      scores: shouldMigrateContestants || shouldMigrateRubric ? {} : data.payload.scores
     };
     await saveRemotePayload(migratedPayload);
     return mergeState(migratedPayload);
@@ -821,7 +891,8 @@ async function saveRemotePayload(payload) {
 }
 
 function saveState() {
-  localStorage.setItem(
+  localStorage.removeItem(SESSION_KEY);
+  sessionStorage.setItem(
     SESSION_KEY,
     JSON.stringify({
       currentUserId: state.currentUserId,
@@ -982,7 +1053,7 @@ function calculateResult(contestantId) {
 function rankedContestants() {
   return state.contestants
     .map((contestant) => ({ contestant, result: calculateResult(contestant.id) }))
-    .sort((a, b) => b.result.rankScore - a.result.rankScore || a.contestant.order - b.contestant.order)
+    .sort((a, b) => b.result.rankScore - a.result.rankScore || sortByDrawOrder(a.contestant, b.contestant))
     .map((row, index) => ({ ...row, rank: row.result.ready ? index + 1 : "" }));
 }
 
@@ -1023,7 +1094,6 @@ function appShell(content, nav) {
     <div class="shell">
       <header class="topbar">
         <div class="brand">
-          <div class="brand-mark">${t("bridgeMark")}</div>
           <div>
             <h1>${t("appTitle")}</h1>
             <p>${t("eventTitle")}</p>
@@ -1214,11 +1284,13 @@ function renderAdminDashboard() {
 
 function renderContestants() {
   const rows = state.contestants
-    .sort((a, b) => a.order - b.order)
+    .sort(sortByDrawOrder)
     .map(
       (item) => `
         <tr>
-          <td>${item.order}</td>
+          <td>
+            <input class="input draw-order-input" type="number" min="1" step="1" name="order-${item.id}" value="${escapeHtml(drawOrderValue(item) ?? "")}" aria-label="${t("drawOrder")} ${escapeHtml(item.number)}" />
+          </td>
           <td>${escapeHtml(item.number)}</td>
           <td>${escapeHtml(contestantSchool(item))}</td>
           <td>${escapeHtml(item.name)}</td>
@@ -1235,18 +1307,25 @@ function renderContestants() {
       <div class="panel-head">
         <div>
           <h2>${t("contestantManagement")}</h2>
-          <p>${t("contestantText")}</p>
+          <p>${t("drawOrderHint")}</p>
         </div>
         <button class="btn primary" data-action="add-contestant">${t("addSampleContestant")}</button>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>${t("sequence")}</th><th>${t("number")}</th><th>${t("school")}</th><th>${t("studentName")}</th><th>${t("group")}</th><th>${t("story")}</th><th>${t("talent")}</th></tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
+      <form data-form="draw-order">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>${t("drawOrder")}</th><th>${t("number")}</th><th>${t("school")}</th><th>${t("studentName")}</th><th>${t("group")}</th><th>${t("story")}</th><th>${t("talent")}</th></tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        <div class="panel-body">
+          <div class="actions">
+            <button class="btn primary" type="submit">${t("saveDrawOrder")}</button>
+          </div>
+        </div>
+      </form>
     </section>
   `;
 }
@@ -1321,7 +1400,7 @@ function renderJudges() {
 function renderRawScores() {
   const headers = judges().map((judge) => `<th>${escapeHtml(judge.name)}</th>`).join("");
   const rows = state.contestants
-    .sort((a, b) => a.order - b.order)
+    .sort(sortByDrawOrder)
     .map((contestant) => {
       const judgeScores = judges()
         .map((judge) => {
@@ -1373,7 +1452,7 @@ function renderResults() {
           <td>${escapeHtml(contestant.number)}</td>
           <td>${escapeHtml(contestant.name)}</td>
           <td>${escapeHtml(contestant.group)}</td>
-          <td>${contestant.order}</td>
+          <td>${escapeHtml(drawOrderLabel(contestant))}</td>
           ${judgeScoreCells}
           <td>${result.high === "" ? "-" : result.high.toFixed(1)}</td>
           <td>${result.low === "" ? "-" : result.low.toFixed(1)}</td>
@@ -1448,12 +1527,12 @@ function renderJudgeContestants() {
   const user = currentUser();
   const isLocked = submissionStatus(user.id) === "submitted";
   const rows = state.contestants
-    .sort((a, b) => a.order - b.order)
+    .sort(sortByDrawOrder)
     .map((contestant) => {
       const score = getScore(user.id, contestant.id);
       return `
         <tr>
-          <td>${contestant.order}</td>
+          <td>${escapeHtml(drawOrderLabel(contestant))}</td>
           <td>${escapeHtml(contestant.number)}</td>
           <td>${escapeHtml(contestant.name)}</td>
           <td>${escapeHtml(contestantPerformance(contestant))}</td>
@@ -1538,7 +1617,7 @@ function renderScoreForm(contestantId) {
         <div class="panel-head">
           <div>
             <h2>${escapeHtml(contestant.name)} · ${escapeHtml(contestant.number)}</h2>
-            <p>${escapeHtml(contestantPerformance(contestant))}${currentLanguage === "zh" ? "，" : ", "}${t("order")} ${contestant.order}${currentLanguage === "zh" ? "，" : ", "}${escapeHtml(contestant.group)}</p>
+            <p>${escapeHtml(contestantPerformance(contestant))}${currentLanguage === "zh" ? "，" : ", "}${t("drawOrder")} ${escapeHtml(drawOrderLabel(contestant))}${currentLanguage === "zh" ? "，" : ", "}${escapeHtml(contestant.group)}</p>
           </div>
           <button class="btn ghost" data-view="judge-contestants">${t("back")}</button>
         </div>
@@ -1609,6 +1688,40 @@ document.addEventListener("submit", (event) => {
     user.mustChangePassword = false;
     saveState();
     showToast(t("passwordChangedToast"));
+    render();
+    return;
+  }
+
+  if (formType === "draw-order") {
+    const formData = new FormData(form);
+    const orders = [];
+
+    for (const contestant of state.contestants) {
+      const rawValue = String(formData.get(`order-${contestant.id}`) ?? "").trim();
+      if (!rawValue) continue;
+
+      const order = Number(rawValue);
+      if (!Number.isInteger(order) || order <= 0) {
+        showToast(t("drawOrderInvalid"));
+        return;
+      }
+      orders.push(order);
+    }
+
+    if (new Set(orders).size !== orders.length) {
+      showToast(t("drawOrderDuplicate"));
+      return;
+    }
+
+    state.contestants = state.contestants.map((contestant) => {
+      const rawValue = String(formData.get(`order-${contestant.id}`) ?? "").trim();
+      return {
+        ...contestant,
+        order: rawValue ? Number(rawValue) : ""
+      };
+    });
+    saveState();
+    showToast(t("drawOrderSaved"));
     render();
     return;
   }
@@ -1839,7 +1952,7 @@ document.addEventListener("click", (event) => {
       story: t("chineseShow"),
       talent: "",
       title: t("chineseShow"),
-      order: index,
+      order: "",
       notes: ""
     });
     saveState();
@@ -1870,7 +1983,7 @@ function exportResultsCsv() {
     contestant.number,
     contestant.name,
     contestant.group,
-    contestant.order,
+    drawOrderLabel(contestant),
     ...judges().map((judge) => {
       const score = getScore(judge.id, contestant.id);
       return isValidScore(score.totalScore) ? Number(score.totalScore).toFixed(1) : "";

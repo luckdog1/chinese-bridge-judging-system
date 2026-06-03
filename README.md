@@ -1,6 +1,6 @@
-# Chinese Bridge Judging System
+# Chinese Bridge Competition Scoring and Evaluation System
 
-汉语桥（小学组）阿德莱德赛区总决赛评审系统原型。
+汉语桥（小学组）阿德莱德赛区总决赛评分评价系统原型。
 
 ## Local development
 
