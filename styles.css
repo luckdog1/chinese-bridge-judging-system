@@ -437,6 +437,89 @@ th {
   align-items: center;
 }
 
+.score-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 16px;
+}
+
+.rubric-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.rubric-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(16, 24, 40, 0.55);
+}
+
+.rubric-dialog {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(1180px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  margin: 24px auto;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 24px 80px rgba(16, 24, 40, 0.28);
+}
+
+.rubric-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.rubric-head h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.rubric-table-wrap {
+  overflow: auto;
+}
+
+.rubric-table {
+  min-width: 1120px;
+  table-layout: fixed;
+}
+
+.rubric-table th {
+  background: #07306e;
+  color: #fff;
+  border-bottom: 1px solid #1b75bb;
+  border-right: 1px solid #1b75bb;
+  font-size: 13px;
+  line-height: 1.35;
+  vertical-align: top;
+}
+
+.rubric-table td {
+  border-right: 1px solid #4aa0d8;
+  border-bottom: 1px solid #4aa0d8;
+  color: #001f55;
+  font-size: 13px;
+  line-height: 1.45;
+  vertical-align: top;
+}
+
+.rubric-table tbody th {
+  width: 170px;
+}
+
+.rubric-table tbody th strong,
+.rubric-table tbody th span {
+  display: block;
+}
+
 .login-page {
   min-height: 100vh;
   display: grid;

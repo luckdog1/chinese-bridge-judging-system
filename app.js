@@ -80,6 +80,10 @@ const I18N = {
     addSampleContestant: "新增示例选手",
     number: "编号",
     name: "姓名",
+    school: "学校",
+    studentName: "学生姓名",
+    story: "故事",
+    talent: "才艺",
     age: "年龄",
     group: "组别",
     performance: "表演项目",
@@ -125,15 +129,20 @@ const I18N = {
     backContestants: "返回参赛列表",
     back: "返回",
     scoreDetails: "评分细则",
+    rubricReference: "参考评分细则",
+    rubricReferenceTitle: "2026 小学组评分细则参考",
+    close: "关闭",
+    criteria: "评分项目",
     detailsHint: "细则可选填；填写后会自动汇总到总分，评委仍可手动调整总分。",
     maxScore: "满分",
     totalScoreRequired: "总分（必填，0-100）",
     commentOptional: "评语（选填）",
     save: "Save 保存",
-    language: "语言表达",
-    content: "内容理解",
-    stage: "舞台表现",
-    creativity: "整体印象",
+    languageProficiency: "语言能力",
+    skillLevel: "技能水平",
+    contentStructure: "内容与结构",
+    presentationCreativity: "呈现与创意",
+    overallImpact: "整体影响力",
     invalidLogin: "账号或密码不正确",
     passwordMin: "新密码至少 6 位",
     passwordChangedToast: "密码已修改",
@@ -234,6 +243,10 @@ const I18N = {
     addSampleContestant: "Add sample contestant",
     number: "Number",
     name: "Name",
+    school: "School",
+    studentName: "Student Name",
+    story: "Story",
+    talent: "Talent",
     age: "Age",
     group: "Group",
     performance: "Performance",
@@ -279,15 +292,20 @@ const I18N = {
     backContestants: "Back to contestant list",
     back: "Back",
     scoreDetails: "Score Details",
+    rubricReference: "Rubric Reference",
+    rubricReferenceTitle: "2026 Primary Group Rubric Reference",
+    close: "Close",
+    criteria: "Criteria",
     detailsHint: "Details are optional. When entered, they are summed into the total score, which can still be manually adjusted.",
     maxScore: "Max",
     totalScoreRequired: "Total score (required, 0-100)",
     commentOptional: "Comment (optional)",
     save: "Save",
-    language: "Language expression",
-    content: "Content understanding",
-    stage: "Stage performance",
-    creativity: "Overall impression",
+    languageProficiency: "Language Proficiency",
+    skillLevel: "Skill Level",
+    contentStructure: "Content and Structure",
+    presentationCreativity: "Presentation & Creativity",
+    overallImpact: "Overall Impact",
     invalidLogin: "Invalid username or password",
     passwordMin: "New password must be at least 6 characters",
     passwordChangedToast: "Password changed",
@@ -319,6 +337,65 @@ const I18N = {
     points: "points"
   }
 };
+
+const RUBRIC_RANGES = ["16-20", "11-15", "6-10", "5-9", "1-4", "0"];
+const RUBRIC_REFERENCE = [
+  {
+    id: "languageProficiency",
+    cells: [
+      "Excellent vocabulary and fluency; natural tone and accurate grammar.\n词汇丰富，表达流利，语调自然，语法准确。",
+      "Good vocabulary; minor errors; fluent and clear overall.\n词汇较好，仅有轻微错误，整体流利清晰。",
+      "Adequate vocabulary; some mistakes; mostly understandable.\n词汇和语法基本正确，有一些错误，但大致能理解。",
+      "Basic vocabulary; frequent errors but understandable.\n词汇基础，错误较多，但仍可理解。",
+      "Very limited vocabulary; many pronunciation/grammar issues.\n词汇非常有限，语音语调问题严重。",
+      "No discernible Chinese used or entirely unintelligible.\n无法辨识中文，或完全无法理解。"
+    ]
+  },
+  {
+    id: "skillLevel",
+    cells: [
+      "Highly skilled and polished; shows mastery and confidence.\n技艺娴熟，表现出自信与掌控力，达到专业水准。",
+      "Well-executed; clearly practiced with few mistakes.\n动作熟练，基本无误，明显经过练习。",
+      "Competent execution; minor flaws but overall effective.\n执行能力尚可，存在小瑕疵，但整体有效。",
+      "Some control shown; frequent mistakes or lack of practice.\n控制力不足，失误较多，练习不够充分。",
+      "Very basic or incomplete skill execution.\n技能很初级或完成度差，动作不完整。",
+      "No recognizable skill or performance effort.\n无法识别任何技能动作或表演内容。"
+    ]
+  },
+  {
+    id: "contentStructure",
+    cells: [
+      "Excellent structure, creativity, and audience engagement.\n内容结构严谨，创意十足，引人入胜。",
+      "Well-structured, engaging, and relevant story.\n内容结构清晰，故事有吸引力且相关性强。",
+      "Structured story; somewhat engaging and clear.\n故事结构完整，内容基本连贯，有一定吸引力。",
+      "Some structure, but story lacks clarity or engagement.\n有一定结构，但内容缺乏清晰性或吸引力。",
+      "Very disorganized or unrelated content.\n内容杂乱，缺乏逻辑性，与主题关系弱。",
+      "No coherent content or structure.\n内容完全混乱或无结构。"
+    ]
+  },
+  {
+    id: "presentationCreativity",
+    cells: [
+      "Exceptionally creative and captivating presentation.\n呈现极具创意，吸引力强，视觉效果出色。",
+      "Very creative and visually appealing.\n非常有创意，视觉上令人愉悦。",
+      "Thoughtful presentation with some creative elements.\n呈现有想法，包含一些创意元素。",
+      "Basic visuals and delivery; limited creativity.\n呈现平淡，缺乏创意与视觉吸引力。",
+      "Poor presentation; lacks originality or preparation.\n呈现准备不足，缺乏原创性或表达不清。",
+      "No creativity or presentation quality.\n无创意或无视觉呈现质量。"
+    ]
+  },
+  {
+    id: "overallImpact",
+    cells: [
+      "Outstanding impact; leaves a lasting impression.\n整体表现出色，极具感染力，令人印象深刻。",
+      "Memorable, creative, and enjoyable to watch.\n创意十足，呈现效果好，令人愉悦。",
+      "Engaging overall; good presentation effort.\n整体表现良好，有一定吸引力。",
+      "Some engagement; potential to be more polished.\n有一定吸引力，但尚需打磨提升。",
+      "Minimal effort or enthusiasm shown.\n表现较差，吸引力不足。",
+      "No effort to engage or connect with the audience.\n无吸引力，无法与观众建立连接。"
+    ]
+  }
+];
 
 const seedData = {
   currentUserId: null,
@@ -399,49 +476,127 @@ const seedData = {
     {
       id: "c-1",
       number: "A001",
-      name: "李明悦",
-      age: 9,
+      school: "Walford Anglican School for girls",
+      name: "Taylor Dean",
+      age: "",
       group: "小学组",
-      title: "中文演讲：我的家乡",
+      story: "《我和中文的“较量”》\"My Challenge with Chinese\"",
+      talent: "《中国话》\"Chinese Language\"",
+      title: "故事：《我和中文的“较量”》\"My Challenge with Chinese\" / 才艺：《中国话》\"Chinese Language\"",
       order: 1,
-      notes: "开场选手"
+      notes: "Walford Anglican School for girls"
     },
     {
       id: "c-2",
       number: "A002",
-      name: "陈思远",
-      age: 10,
+      school: "Plympton International College",
+      name: "Louis Valente",
+      age: "",
       group: "小学组",
-      title: "朗诵：春晓",
+      story: "《猴子捞月》\"The Monkey Tries to Catch the Moon\"",
+      talent: "《我有心声》\"I have a voice\"",
+      title: "故事：《猴子捞月》\"The Monkey Tries to Catch the Moon\" / 才艺：《我有心声》\"I have a voice\"",
       order: 2,
-      notes: ""
+      notes: "Plympton International College"
     },
     {
       id: "c-3",
       number: "A003",
-      name: "王可欣",
-      age: 8,
+      school: "Plympton International College",
+      name: "Ella Muratovski",
+      age: "",
       group: "小学组",
-      title: "故事：中国节日",
+      story: "《神奇的汉字》\"Magic Chinese Characters\"",
+      talent: "古筝演奏 Guzheng Performance",
+      title: "故事：《神奇的汉字》\"Magic Chinese Characters\" / 才艺：古筝演奏 Guzheng Performance",
       order: 3,
-      notes: ""
+      notes: "Plympton International College"
     },
     {
       id: "c-4",
       number: "A004",
-      name: "赵一诺",
-      age: 11,
+      school: "Plympton International College",
+      name: "Imogen Hughes-Wright",
+      age: "",
       group: "小学组",
-      title: "才艺展示：古诗配画",
+      story: "《花木兰》\"Hua Mulan\"",
+      talent: "《雪绒花》\"Edelweiss\"",
+      title: "故事：《花木兰》\"Hua Mulan\" / 才艺：《雪绒花》\"Edelweiss\"",
       order: 4,
-      notes: ""
+      notes: "Plympton International College"
+    },
+    {
+      id: "c-5",
+      number: "A005",
+      school: "Prince Alfred College",
+      name: "Archie Badman",
+      age: "",
+      group: "小学组",
+      story: "《狐狸和葡萄》\"The Fox and the Grapes\"",
+      talent: "《春天在哪里》\"Where is Spring\"",
+      title: "故事：《狐狸和葡萄》\"The Fox and the Grapes\" / 才艺：《春天在哪里》\"Where is Spring\"",
+      order: 5,
+      notes: "Prince Alfred College"
+    },
+    {
+      id: "c-6",
+      number: "A006",
+      school: "Prince Alfred College",
+      name: "Seb Henderson",
+      age: "",
+      group: "小学组",
+      story: "《屈原的故事》\"The Story of Qu Yuan\"",
+      talent: "《刀剑如梦》\"A Life of Fighting is but a Dream\"",
+      title: "故事：《屈原的故事》\"The Story of Qu Yuan\" / 才艺：《刀剑如梦》\"A Life of Fighting is but a Dream\"",
+      order: 6,
+      notes: "Prince Alfred College"
+    },
+    {
+      id: "c-7",
+      number: "A007",
+      school: "Pulteney Grammar School",
+      name: "Amy Lyttle",
+      age: "",
+      group: "小学组",
+      story: "《哈尔滨》\"Harbin\"",
+      talent: "写汉字 Chinese Character Writing",
+      title: "故事：《哈尔滨》\"Harbin\" / 才艺：写汉字 Chinese Character Writing",
+      order: 7,
+      notes: "Pulteney Grammar School"
+    },
+    {
+      id: "c-8",
+      number: "A008",
+      school: "Pulteney Grammar School",
+      name: "Abigail Roy",
+      age: "",
+      group: "小学组",
+      story: "《哈尔滨》\"Harbin\"",
+      talent: "舞狮表演 Chinese Lion Dance",
+      title: "故事：《哈尔滨》\"Harbin\" / 才艺：舞狮表演 Chinese Lion Dance",
+      order: 8,
+      notes: "Pulteney Grammar School"
+    },
+    {
+      id: "c-9",
+      number: "A009",
+      school: "Pulteney Grammar School",
+      name: "Sebastian Michael",
+      age: "",
+      group: "小学组",
+      story: "《香港》\"Hongkong\"",
+      talent: "中国鼓表演 Chinese Drum Performance",
+      title: "故事：《香港》\"Hongkong\" / 才艺：中国鼓表演 Chinese Drum Performance",
+      order: 9,
+      notes: "Pulteney Grammar School"
     }
   ],
   scoreItems: [
-    { id: "language", name: "语言表达", max: 40 },
-    { id: "content", name: "内容理解", max: 30 },
-    { id: "stage", name: "舞台表现", max: 20 },
-    { id: "creativity", name: "整体印象", max: 10 }
+    { id: "languageProficiency", name: "语言能力", max: 20 },
+    { id: "skillLevel", name: "技能水平", max: 20 },
+    { id: "contentStructure", name: "内容与结构", max: 20 },
+    { id: "presentationCreativity", name: "呈现与创意", max: 20 },
+    { id: "overallImpact", name: "整体影响力", max: 20 }
   ],
   scores: {},
   auditLogs: []
@@ -463,6 +618,51 @@ function scoreItemName(item) {
   return t(item.id) || item.name;
 }
 
+function contestantSchool(contestant) {
+  return contestant.school || contestant.notes || "";
+}
+
+function contestantStory(contestant) {
+  if (contestant.story) return contestant.story;
+  const match = String(contestant.title || "").match(/故事：(.+?)(?:\s*\/\s*才艺：|$)/);
+  return match ? match[1] : contestant.title || "";
+}
+
+function contestantTalent(contestant) {
+  if (contestant.talent) return contestant.talent;
+  const match = String(contestant.title || "").match(/才艺：(.+)$/);
+  return match ? match[1] : "";
+}
+
+function contestantPerformance(contestant) {
+  const story = contestantStory(contestant);
+  const talent = contestantTalent(contestant);
+  if (story && talent) return `${t("story")}: ${story} / ${t("talent")}: ${talent}`;
+  return story || talent || contestant.title || "";
+}
+
+function needsOfficialContestantMigration(payload) {
+  const contestants = payload?.contestants || [];
+  const oldDemoNames = ["李明悦", "陈思远", "王可欣", "赵一诺"];
+  const isOldDemoList = contestants.length === 4 && contestants.some((contestant) => oldDemoNames.includes(contestant.name));
+  const isUndividedOfficialList =
+    contestants.length === seedData.contestants.length &&
+    contestants[0]?.name === "Taylor Dean" &&
+    (!contestants[0]?.school || !contestants[0]?.story || !contestants[0]?.talent);
+
+  return (
+    isOldDemoList ||
+    isUndividedOfficialList
+  );
+}
+
+function needsRubricMigration(payload) {
+  const scoreItems = payload?.scoreItems || [];
+  const expectedIds = seedData.scoreItems.map((item) => item.id).join("|");
+  const currentIds = scoreItems.map((item) => item.id).join("|");
+  return currentIds !== expectedIds || scoreItems.some((item) => item.max !== 20);
+}
+
 function languageButton() {
   return `
     <button class="language-toggle" data-action="toggle-language" aria-label="Switch language">
@@ -470,6 +670,50 @@ function languageButton() {
       <span class="${currentLanguage === "en" ? "active" : ""}">EN</span>
     </button>
   `;
+}
+
+function showRubricReference() {
+  const oldModal = document.querySelector(".rubric-modal");
+  if (oldModal) oldModal.remove();
+
+  const rows = RUBRIC_REFERENCE.map((row) => {
+    const item = state.scoreItems.find((scoreItem) => scoreItem.id === row.id) || { id: row.id, max: 20 };
+    return `
+      <tr>
+        <th>
+          <strong>${escapeHtml(scoreItemName(item))}</strong>
+          <span>${currentLanguage === "zh" ? "20 分" : "20 pts"}</span>
+        </th>
+        ${row.cells
+          .map((cell) => `<td>${escapeHtml(cell).replaceAll("\n", "<br>")}</td>`)
+          .join("")}
+      </tr>
+    `;
+  }).join("");
+
+  const modal = document.createElement("div");
+  modal.className = "rubric-modal";
+  modal.innerHTML = `
+    <div class="rubric-backdrop" data-action="close-rubric-reference"></div>
+    <section class="rubric-dialog" role="dialog" aria-modal="true" aria-label="${escapeHtml(t("rubricReferenceTitle"))}">
+      <div class="rubric-head">
+        <h2>${t("rubricReferenceTitle")}</h2>
+        <button class="btn ghost" data-action="close-rubric-reference">${t("close")}</button>
+      </div>
+      <div class="rubric-table-wrap">
+        <table class="rubric-table">
+          <thead>
+            <tr>
+              <th>${t("criteria")}</th>
+              ${RUBRIC_RANGES.map((range) => `<th>${range}</th>`).join("")}
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </section>
+  `;
+  document.body.appendChild(modal);
 }
 
 function loadLocalJson(key, fallback) {
@@ -513,7 +757,18 @@ function mergeState(payload) {
 
 async function loadState() {
   if (!supabase) {
-    return mergeState(loadLocalJson(STORAGE_KEY, dataPayloadFromState(seedData)));
+    const localPayload = loadLocalJson(STORAGE_KEY, dataPayloadFromState(seedData));
+    if (needsOfficialContestantMigration(localPayload)) {
+      localPayload.contestants = structuredClone(seedData.contestants);
+      localPayload.scores = {};
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(localPayload));
+    }
+    if (needsRubricMigration(localPayload)) {
+      localPayload.scoreItems = structuredClone(seedData.scoreItems);
+      localPayload.scores = {};
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(localPayload));
+    }
+    return mergeState(localPayload);
   }
 
   const { data, error } = await supabase
@@ -532,6 +787,24 @@ async function loadState() {
     const initialPayload = dataPayloadFromState(seedData);
     await saveRemotePayload(initialPayload);
     return mergeState(initialPayload);
+  }
+
+  const shouldMigrateContestants = needsOfficialContestantMigration(data.payload);
+  const shouldMigrateRubric = needsRubricMigration(data.payload);
+
+  if (shouldMigrateContestants || shouldMigrateRubric) {
+    const migratedPayload = {
+      ...data.payload,
+      contestants: shouldMigrateContestants
+        ? structuredClone(seedData.contestants)
+        : data.payload.contestants,
+      scoreItems: shouldMigrateRubric
+        ? structuredClone(seedData.scoreItems)
+        : data.payload.scoreItems,
+      scores: {}
+    };
+    await saveRemotePayload(migratedPayload);
+    return mergeState(migratedPayload);
   }
 
   return mergeState(data.payload);
@@ -945,13 +1218,13 @@ function renderContestants() {
     .map(
       (item) => `
         <tr>
-          <td>${escapeHtml(item.number)}</td>
-          <td>${escapeHtml(item.name)}</td>
-          <td>${item.age}</td>
-          <td>${escapeHtml(item.group)}</td>
-          <td>${escapeHtml(item.title)}</td>
           <td>${item.order}</td>
-          <td>${escapeHtml(item.notes)}</td>
+          <td>${escapeHtml(item.number)}</td>
+          <td>${escapeHtml(contestantSchool(item))}</td>
+          <td>${escapeHtml(item.name)}</td>
+          <td>${escapeHtml(item.group)}</td>
+          <td>${escapeHtml(contestantStory(item))}</td>
+          <td>${escapeHtml(contestantTalent(item))}</td>
         </tr>
       `
     )
@@ -969,7 +1242,7 @@ function renderContestants() {
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>${t("number")}</th><th>${t("name")}</th><th>${t("age")}</th><th>${t("group")}</th><th>${t("performance")}</th><th>${t("order")}</th><th>${t("notes")}</th></tr>
+            <tr><th>${t("sequence")}</th><th>${t("number")}</th><th>${t("school")}</th><th>${t("studentName")}</th><th>${t("group")}</th><th>${t("story")}</th><th>${t("talent")}</th></tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
@@ -1183,7 +1456,7 @@ function renderJudgeContestants() {
           <td>${contestant.order}</td>
           <td>${escapeHtml(contestant.number)}</td>
           <td>${escapeHtml(contestant.name)}</td>
-          <td>${escapeHtml(contestant.title)}</td>
+          <td>${escapeHtml(contestantPerformance(contestant))}</td>
           <td>${isValidScore(score.totalScore) ? Number(score.totalScore).toFixed(1) : "-"}</td>
           <td><span class="badge ${statusClass(score.status)}">${statusText(score.status)}</span></td>
           <td><button class="btn primary" data-action="score-contestant" data-id="${contestant.id}" ${isLocked ? "disabled" : ""}>${t("score")}</button></td>
@@ -1265,11 +1538,14 @@ function renderScoreForm(contestantId) {
         <div class="panel-head">
           <div>
             <h2>${escapeHtml(contestant.name)} · ${escapeHtml(contestant.number)}</h2>
-            <p>${escapeHtml(contestant.title)}${currentLanguage === "zh" ? "，" : ", "}${t("order")} ${contestant.order}${currentLanguage === "zh" ? "，" : ", "}${escapeHtml(contestant.group)}</p>
+            <p>${escapeHtml(contestantPerformance(contestant))}${currentLanguage === "zh" ? "，" : ", "}${t("order")} ${contestant.order}${currentLanguage === "zh" ? "，" : ", "}${escapeHtml(contestant.group)}</p>
           </div>
           <button class="btn ghost" data-view="judge-contestants">${t("back")}</button>
         </div>
         <div class="panel-body">
+          <div class="score-toolbar">
+            <button class="btn ghost" data-action="open-rubric-reference" type="button">${t("rubricReference")}</button>
+          </div>
           <form class="form" data-form="score" data-id="${contestant.id}">
             <div>
               <h3 class="section-title">${t("scoreDetails")}</h3>
@@ -1460,6 +1736,16 @@ document.addEventListener("click", (event) => {
   const action = target.dataset.action;
   if (!action) return;
 
+  if (action === "open-rubric-reference") {
+    showRubricReference();
+    return;
+  }
+
+  if (action === "close-rubric-reference") {
+    document.querySelector(".rubric-modal")?.remove();
+    return;
+  }
+
   if (action === "toggle-language") {
     currentLanguage = currentLanguage === "zh" ? "en" : "zh";
     localStorage.setItem(LANGUAGE_KEY, currentLanguage);
@@ -1546,9 +1832,12 @@ document.addEventListener("click", (event) => {
     state.contestants.push({
       id: crypto.randomUUID(),
       number: `A${String(index).padStart(3, "0")}`,
+      school: "",
       name: `${t("sampleContestant")} ${index}`,
       age: 9,
       group: currentLanguage === "zh" ? "小学组" : "Primary Group",
+      story: t("chineseShow"),
+      talent: "",
       title: t("chineseShow"),
       order: index,
       notes: ""
