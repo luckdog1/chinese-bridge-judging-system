@@ -7,6 +7,7 @@ const SUPABASE_STATE_ID = "main";
 const DATA_VERSION = 3;
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const REMOTE_SYNC_INTERVAL_MS = 1500;
 const supabase =
   SUPABASE_URL && SUPABASE_ANON_KEY ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
@@ -54,6 +55,7 @@ const I18N = {
     forceChangeText: "这是评委进入评分页前的强制步骤，用来模拟现场账号首次分发后的安全要求。",
     enterNewPassword: "请输入新密码后继续评分。",
     newPassword: "新密码",
+    comment: "评语",
     saveAndEnter: "保存并进入",
     backLogin: "返回登录",
     dashboard: "比赛概览",
@@ -110,7 +112,7 @@ const I18N = {
     returnForEdit: "退回修改",
     rawScoresText: "按小朋友展示每位评委的总分和状态。",
     finalResultsTitle: "最终成绩与排名",
-    finalResultsText: "所有评委提交后自动去掉一个最高分和一个最低分，保留两位小数。",
+    finalResultsText: "有评委提交后立即按已提交分数计算；提交分数达到 3 个及以上时去掉一个最高分和一个最低分，保留两位小数。",
     exportCsv: "导出 CSV",
     rank: "排名",
     sequence: "顺序",
@@ -158,6 +160,9 @@ const I18N = {
     initialPasswordMin: "初始密码至少 6 位",
     usernameExists: "这个登录账号已经存在",
     createdJudge: "已创建",
+    deleteJudge: "删除",
+    confirmDeleteJudge: "确定删除这个评委账号吗？该评委的所有评分也会一起删除。",
+    judgeDeleted: "评委账号已删除",
     totalScoreInvalid: "总分必须在 0 到 100 之间",
     scoreSaved: "评分已保存",
     unsavedLeave: "当前评分尚未保存，确定离开吗？",
@@ -166,7 +171,7 @@ const I18N = {
     missingAllScores: "还有小朋友未完成评分",
     confirmSubmit: "提交后评分将锁定，确定提交全部评分吗？",
     allSubmitted: "已提交全部评分",
-    returnReasonPrompt: "请输入退回原因（可留空）：",
+    returnReasonPrompt: "确定退回该评委的评分，让评委重新修改吗？",
     returnReasonDefault: "需要重新核对评分",
     returnedToast: "已退回评委评分",
     passwordResetTo: "密码已重置为",
@@ -224,6 +229,7 @@ const I18N = {
     forceChangeText: "Judges must change the initial password before entering the scoring pages.",
     enterNewPassword: "Enter a new password to continue.",
     newPassword: "New password",
+    comment: "Comment",
     saveAndEnter: "Save and enter",
     backLogin: "Back to login",
     dashboard: "Overview",
@@ -280,7 +286,7 @@ const I18N = {
     returnForEdit: "Return for edits",
     rawScoresText: "View each judge's total score and status by contestant.",
     finalResultsTitle: "Final Scores and Ranking",
-    finalResultsText: "After all judges submit, one highest and one lowest score are dropped. Final averages keep two decimals.",
+    finalResultsText: "Results update from submitted scores immediately. When at least 3 scores are submitted, one highest and one lowest score are dropped. Final averages keep two decimals.",
     exportCsv: "Export CSV",
     rank: "Rank",
     sequence: "Order",
@@ -328,6 +334,9 @@ const I18N = {
     initialPasswordMin: "Initial password must be at least 6 characters",
     usernameExists: "This username already exists",
     createdJudge: "Created",
+    deleteJudge: "Delete",
+    confirmDeleteJudge: "Delete this judge account? All scores from this judge will also be deleted.",
+    judgeDeleted: "Judge account deleted",
     totalScoreInvalid: "Total score must be between 0 and 100",
     scoreSaved: "Score saved",
     unsavedLeave: "Current score is not saved. Leave anyway?",
@@ -336,7 +345,7 @@ const I18N = {
     missingAllScores: "Some contestants are missing scores",
     confirmSubmit: "Scores will be locked after submission. Submit all scores?",
     allSubmitted: "All scores submitted",
-    returnReasonPrompt: "Enter return reason (optional):",
+    returnReasonPrompt: "Return this judge's scores for editing?",
     returnReasonDefault: "Needs score review",
     returnedToast: "Judge scores returned",
     passwordResetTo: "Password reset to",
@@ -624,6 +633,9 @@ let dirtyScore = false;
 let isBooting = true;
 let storageMode = supabase ? "supabase" : "local";
 let saveTimer = null;
+let syncTimer = null;
+let remoteSaveInFlight = false;
+let activeScoreContestantId = null;
 let currentLanguage = localStorage.getItem(LANGUAGE_KEY) || "zh";
 
 function t(key) {
@@ -907,6 +919,8 @@ function saveState() {
 
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
+    saveTimer = null;
+    remoteSaveInFlight = true;
     try {
       await saveRemotePayload(payload);
     } catch (error) {
@@ -914,8 +928,69 @@ function saveState() {
       storageMode = "local";
       showToast(t("saveRemoteFailed"));
       render();
+    } finally {
+      remoteSaveInFlight = false;
     }
   }, 150);
+}
+
+async function syncRemoteState() {
+  const activeElement = document.activeElement;
+  const isEditing =
+    activeElement?.matches?.("input, textarea, select, [contenteditable='true']") || false;
+  const syncableViews = new Set(["dashboard", "scores", "results"]);
+
+  if (
+    !supabase ||
+    storageMode !== "supabase" ||
+    !state.currentUserId ||
+    !syncableViews.has(state.activeView) ||
+    activeScoreContestantId ||
+    dirtyScore ||
+    isEditing ||
+    saveTimer ||
+    remoteSaveInFlight
+  ) {
+    return;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("judging_state")
+      .select("payload")
+      .eq("id", SUPABASE_STATE_ID)
+      .maybeSingle();
+
+    if (error || !data?.payload) {
+      if (error) console.error(error);
+      return;
+    }
+
+    const currentPayloadJson = JSON.stringify(dataPayloadFromState(state));
+    const remotePayloadJson = JSON.stringify(data.payload);
+    if (remotePayloadJson === currentPayloadJson) return;
+
+    const currentUserId = state.currentUserId;
+    const activeView = state.activeView;
+    localStorage.setItem(STORAGE_KEY, remotePayloadJson);
+    state = {
+      ...mergeState(data.payload),
+      currentUserId,
+      activeView
+    };
+    if (activeScoreContestantId && state.currentUserId) {
+      renderScoreForm(activeScoreContestantId);
+    } else {
+      render();
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function startRemoteSync() {
+  if (!supabase || storageMode !== "supabase" || syncTimer) return;
+  syncTimer = setInterval(syncRemoteState, REMOTE_SYNC_INTERVAL_MS);
 }
 
 function roleLabel(role) {
@@ -1016,26 +1091,55 @@ function validateScoreDetails(details) {
   return "";
 }
 
+function clampNumberInput(input, min, max) {
+  if (!input || input.value === "") return;
+
+  const value = Number(input.value);
+  if (!Number.isFinite(value)) return;
+
+  if (value < min) input.value = String(min);
+  if (value > max) input.value = String(max);
+}
+
+function updateTotalFromDetailInputs(form) {
+  let sum = 0;
+  let hasDetail = false;
+
+  state.scoreItems.forEach((item) => {
+    const input = form.elements[`detail-${item.id}`];
+    clampNumberInput(input, 0, item.max);
+
+    if (input.value !== "") {
+      hasDetail = true;
+      const value = Number(input.value);
+      if (Number.isFinite(value)) {
+        sum += value;
+      }
+    }
+  });
+
+  if (hasDetail) {
+    form.elements.totalScore.value = Math.min(100, Math.max(0, sum)).toFixed(1);
+  }
+}
+
 function calculateResult(contestantId) {
-  const submittedScores = judges()
+  const validScores = judges()
     .map((judge) => getScore(judge.id, contestantId))
-    .filter((score) => score.status === "submitted" && isValidScore(score.totalScore))
+    .filter((score) => isValidScore(score.totalScore))
     .map((score) => Number(score.totalScore));
 
-  const required = judges().length;
-  if (submittedScores.length !== required) {
-    return { ready: false, scores: submittedScores, high: "", low: "", average: "", rankScore: -1 };
+  if (validScores.length === 0) {
+    return { ready: false, scores: validScores, high: "", low: "", average: "", rankScore: -1 };
   }
 
-  const sorted = [...submittedScores].sort((a, b) => b - a);
-  let used = [...submittedScores];
-  let high = "";
-  let low = "";
+  const sorted = [...validScores].sort((a, b) => b - a);
+  let used = [...validScores];
+  const high = Math.max(...validScores);
+  const low = Math.min(...validScores);
 
   if (used.length >= 3) {
-    high = Math.max(...used);
     used.splice(used.indexOf(high), 1);
-    low = Math.min(...used);
     used.splice(used.indexOf(low), 1);
   }
 
@@ -1151,28 +1255,21 @@ function renderLogin() {
     <div class="login-page">
       <section class="login-visual">
         <h1>${t("bootTitle")}</h1>
-        <p>${t("loginIntro")}</p>
       </section>
       <section class="login-panel">
         <div class="login-tools">${languageButton()}</div>
         <h2>${t("loginTitle")}</h2>
-        <p>${storageMode === "supabase" ? t("supabaseConnected") : t("localConnected")}</p>
         <form class="form" data-form="login">
           <div class="field">
             <label for="username">${t("username")}</label>
-            <input class="input" id="username" name="username" autocomplete="username" value="admin" />
+            <input class="input" id="username" name="username" autocomplete="username" />
           </div>
           <div class="field">
             <label for="password">${t("password")}</label>
-            <input class="input" id="password" name="password" type="password" autocomplete="current-password" value="admin123" />
+            <input class="input" id="password" name="password" type="password" autocomplete="current-password" />
           </div>
           <button class="btn primary" type="submit">${t("login")}</button>
         </form>
-        <div class="account-list">
-          <strong>${t("demoAccounts")}</strong>
-          <span>${t("adminDemo")}</span>
-          <span>${t("judgeDemo")}</span>
-        </div>
       </section>
     </div>
   `;
@@ -1346,6 +1443,7 @@ function renderJudges() {
           <td class="actions">
             <button class="btn ghost" data-action="reset-password" data-id="${judge.id}">${t("resetPassword")}</button>
             <button class="btn danger" data-action="return-judge" data-id="${judge.id}" ${status === "not_started" ? "disabled" : ""}>${t("returnForEdit")}</button>
+            <button class="btn danger" data-action="delete-judge" data-id="${judge.id}">${t("deleteJudge")}</button>
           </td>
         </tr>
       `;
@@ -1405,7 +1503,13 @@ function renderRawScores() {
       const judgeScores = judges()
         .map((judge) => {
           const score = getScore(judge.id, contestant.id);
-          return `<td>${isValidScore(score.totalScore) ? Number(score.totalScore).toFixed(1) : "-"} <span class="badge ${statusClass(score.status)}">${statusText(score.status)}</span></td>`;
+          const comment = String(score.comment || "").trim();
+          return `
+            <td>
+              <div>${isValidScore(score.totalScore) ? Number(score.totalScore).toFixed(1) : "-"} <span class="badge ${statusClass(score.status)}">${statusText(score.status)}</span></div>
+              ${comment ? `<div class="score-comment"><strong>${t("comment")}:</strong> ${escapeHtml(comment)}</div>` : ""}
+            </td>
+          `;
         })
         .join("");
       return `
@@ -1597,6 +1701,7 @@ function renderJudgeSubmit() {
 }
 
 function renderScoreForm(contestantId) {
+  activeScoreContestantId = contestantId;
   const user = currentUser();
   const contestant = state.contestants.find((item) => item.id === contestantId);
   const score = getScore(user.id, contestantId);
@@ -1772,6 +1877,7 @@ document.addEventListener("submit", (event) => {
   if (formType === "score") {
     const user = currentUser();
     const contestantId = form.dataset.id;
+    updateTotalFromDetailInputs(form);
     const formData = new FormData(form);
     const totalScore = String(formData.get("totalScore"));
 
@@ -1812,24 +1918,14 @@ document.addEventListener("input", (event) => {
   if (!form) return;
   dirtyScore = true;
 
+  if (event.target.name === "totalScore") {
+    clampNumberInput(event.target, 0, 100);
+    return;
+  }
+
   if (!event.target.name.startsWith("detail-")) return;
 
-  let sum = 0;
-  let hasDetail = false;
-  state.scoreItems.forEach((item) => {
-    const input = form.elements[`detail-${item.id}`];
-    if (input.value !== "") {
-      hasDetail = true;
-      const value = Number(input.value);
-      if (Number.isFinite(value) && value >= 0 && value <= item.max) {
-        sum += value;
-      }
-    }
-  });
-
-  if (hasDetail) {
-    form.elements.totalScore.value = Math.min(100, Math.max(0, sum)).toFixed(1);
-  }
+  updateTotalFromDetailInputs(form);
 });
 
 document.addEventListener("click", (event) => {
@@ -1840,6 +1936,7 @@ document.addEventListener("click", (event) => {
   if (view) {
     if (dirtyScore && !confirm(t("unsavedLeave"))) return;
     dirtyScore = false;
+    activeScoreContestantId = null;
     state.activeView = view;
     saveState();
     render();
@@ -1882,6 +1979,7 @@ document.addEventListener("click", (event) => {
   }
 
   if (action === "score-contestant") {
+    activeScoreContestantId = target.dataset.id;
     renderScoreForm(target.dataset.id);
   }
 
@@ -1904,19 +2002,26 @@ document.addEventListener("click", (event) => {
 
   if (action === "return-judge") {
     const judgeId = target.dataset.id;
-    const reason = prompt(t("returnReasonPrompt"), t("returnReasonDefault"));
+    if (!confirm(t("returnReasonPrompt"))) return;
+    const reason = t("returnReasonDefault");
+
+    let returnedCount = 0;
     state.contestants.forEach((contestant) => {
       const score = getScore(judgeId, contestant.id);
       if (score.status !== "not_started") {
-        setScore({
+        state.scores[`${judgeId}:${contestant.id}`] = {
           ...score,
           status: "returned",
           returnedAt: new Date().toISOString(),
           returnedBy: currentUser().id,
           returnReason: reason || ""
-        });
+        };
+        returnedCount += 1;
       }
     });
+
+    if (!returnedCount) return;
+
     state.auditLogs.push({
       id: crypto.randomUUID(),
       userId: currentUser().id,
@@ -1937,6 +2042,30 @@ document.addEventListener("click", (event) => {
     judge.mustChangePassword = true;
     saveState();
     showToast(`${judge.name} ${t("passwordResetTo")} 123456`);
+    render();
+  }
+
+  if (action === "delete-judge") {
+    const judgeId = target.dataset.id;
+    const judge = state.users.find((user) => user.id === judgeId);
+    if (!judge || !confirm(t("confirmDeleteJudge"))) return;
+
+    state.users = state.users.filter((user) => user.id !== judgeId);
+    Object.keys(state.scores).forEach((key) => {
+      if (key.startsWith(`${judgeId}:`)) delete state.scores[key];
+    });
+
+    state.auditLogs.push({
+      id: crypto.randomUUID(),
+      userId: currentUser().id,
+      action: "delete_judge",
+      targetType: "judge",
+      targetId: judgeId,
+      details: judge.username,
+      createdAt: new Date().toISOString()
+    });
+    saveState();
+    showToast(t("judgeDeleted"));
     render();
   }
 
@@ -2025,6 +2154,7 @@ async function boot() {
   } finally {
     isBooting = false;
     render();
+    startRemoteSync();
   }
 }
 
